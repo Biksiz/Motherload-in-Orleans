@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Motherload à Orléans</string>
+    <string name="connexion_message_bienvenue">Bienvenue dans MOTHERLOAD !</string>
+    <string name="connexion_bouton_connecter">Se connecter</string>
+    <string name="connexion_champ_nom">Nom du compte</string>
+    <string name="connexion_champ_mdp">Mot de passe</string>
+</resources>
