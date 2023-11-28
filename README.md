@@ -20,8 +20,8 @@ cd motherload-in-orleans
 ```
 
 ## Auteurs
-Bilal ESSALAK ELOURRAK
-Redwan OMARI
+- Bilal ESSALAK ELOURRAK
+- Redwan OMARI
 
 ## Statut du projet
 Nous avons ajoutés une grande partie des fonctionnalités demandées. Voici les fonctionnalités qui n'ont pas pû être implementées:

@@ -1,4 +1,4 @@
-package com.example.motherloadinorlans
+package com.example.motherloadinorleans
 
 import org.junit.Test
 

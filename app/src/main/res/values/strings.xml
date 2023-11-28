@@ -1,7 +1,4 @@
 <resources>
-    <string name="app_name">Motherload in Orléans</string>
-    <string name="connexion_message_bienvenue">Welcome in MOTHERLOAD !</string>
-    <string name="connexion_bouton_connecter">Sign Up</string>
-    <string name="connexion_champ_nom">Name of account</string>
-    <string name="connexion_champ_mdp">Password</string>
+    <string name="app_name">MotherloadInOrleans</string>
+    <string name="login_text_login">Login</string>
 </resources>
