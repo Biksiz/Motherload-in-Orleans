@@ -17,6 +17,7 @@ import androidx.navigation.compose.rememberNavController
 import com.example.motherloadinorleans.ui.theme.MotherLoadInOrleansComposeTheme
 import com.example.motherloadinorleans.view.LoginPage
 import com.example.motherloadinorleans.view.Menu
+import com.example.motherloadinorleans.view.Settings
 
 class MainActivity : ComponentActivity() {
 
@@ -53,6 +54,7 @@ fun navigatePage() {
         builder = {
             composable("login_page", content = { LoginPage(navController = navController) })
             composable("menu_page", content = { Menu(navController = navController) })
+            composable("settings_page", content = { Settings(navController = navController) })
         }
     )
 }

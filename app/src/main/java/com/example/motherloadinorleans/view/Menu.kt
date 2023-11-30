@@ -42,7 +42,7 @@ fun Menu(navController: NavController) {
                 title = { },
                 navigationIcon = {
                     IconButton(onClick = {
-                        /*Navigation page*/
+                        navController.navigate("settings_page")
                     }) {
                         Icon(Icons.Filled.Settings, contentDescription = "Paramètres")
                     }
