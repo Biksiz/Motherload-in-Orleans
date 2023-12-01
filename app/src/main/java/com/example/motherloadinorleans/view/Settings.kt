@@ -24,6 +24,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Color.Companion.White
 import androidx.compose.ui.graphics.Color.Companion.Black
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 
@@ -73,4 +74,10 @@ fun Settings(navController: NavController) {
             }
         }
     )
+}
+
+@Preview(showBackground = true)
+@Composable
+fun DefaultPreview() {
+    Settings(navController = NavController(LocalContext.current))
 }
