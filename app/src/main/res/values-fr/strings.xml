@@ -2,4 +2,24 @@
 <resources>
     <string name="app_name">MotherloadInOrleans</string>
     <string name="login_text_login">Se connecter</string>
+    <string name="login_text_email">Adresse Mail</string>
+    <string name="login_text_password">Mot de Passe</string>
+    <string name="login_text_signin">Se connecter</string>
+    <string name="login_msg_emailEmpty">Veuillez entrer votre Email !</string>
+    <string name="login_msg_passwordEmpty">Veuillez entrer votre Mot de Passe !</string>
+    <string name="login_msg_success">Connexion réussie !</string>
+    <string name="login_msg_error">Echec de la connexion !</string>
+    <string name="menu_text_parameters">Paramètres</string>
+    <string name="menu_text_store">Magasin</string>
+    <string name="menu_text_workshop">Atelier</string>
+    <string name="menu_text_play">Jouer</string>
+    <string name="parameters_text_parameters">Paramètres</string>
+    <string name="parameters_text_changename">Changer son nom</string>
+    <string name="parameters_text_reinitializeaccount">Réinitialiser son compte</string>
+    <string name="changename_text_changename">Changer son nom</string>
+    <string name="changename_edit_newname">Nouveau nom</string>
+    <string name="parameters_button_return">Retour</string>
+    <string name="parameters_dialog_areYouSure">Êtes vous sûr ?</string>
+    <string name="yes">Oui</string>
+    <string name="no">Non</string>
 </resources>

@@ -13,6 +13,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.*
 import androidx.compose.material.IconButton
@@ -42,7 +43,9 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.window.Dialog
+import com.example.motherloadinorleans.R
 
 
 @Composable
@@ -59,7 +62,7 @@ fun Settings(navController: NavController) {
                     IconButton(onClick = {
                         navController.navigate("menu_page")
                     }) {
-                        Icon(Icons.Filled.ArrowBack, contentDescription = "Retour")
+                        Icon(Icons.Filled.ArrowBack, contentDescription = stringResource(id = R.string.parameters_button_return))
                     }
                 },
                 backgroundColor = Color.White,
@@ -75,7 +78,7 @@ fun Settings(navController: NavController) {
                     .padding(top = 32.dp, start = 16.dp, end = 16.dp),
             ) {
                 Text(
-                    text = "Paramètres",
+                    text = stringResource(id = R.string.parameters_text_parameters),
                     fontSize = 30.sp,
                     fontWeight = FontWeight.Bold,
                     color = Black,
@@ -93,9 +96,9 @@ fun Settings(navController: NavController) {
                         verticalAlignment = Alignment.CenterVertically,
                         modifier = Modifier.padding(16.dp)
                     ) {
-                        Icon(Icons.Filled.AccountCircle, contentDescription = "Changer son nom")
+                        Icon(Icons.Filled.AccountCircle, contentDescription = stringResource(id = R.string.parameters_text_changename))
                         Spacer(modifier = Modifier.width(8.dp))
-                        Text("Changer son nom", fontWeight = FontWeight.Bold, fontSize = 16.sp)
+                        Text(stringResource(id = R.string.parameters_text_changename), fontWeight = FontWeight.Bold, fontSize = 16.sp)
                     }
                 }
 
@@ -114,9 +117,9 @@ fun Settings(navController: NavController) {
                         verticalAlignment = Alignment.CenterVertically,
                         modifier = Modifier.padding(16.dp)
                     ) {
-                        Icon(Icons.Filled.Close, contentDescription = "Réinitialiser compte", tint = Red)
+                        Icon(Icons.Filled.Close, contentDescription = stringResource(id = R.string.parameters_text_reinitializeaccount), tint = Red)
                         Spacer(modifier = Modifier.width(8.dp))
-                        Text("Réinitialiser compte", color = Color.Red, fontWeight = FontWeight.Bold, fontSize = 16.sp)
+                        Text(stringResource(id = R.string.parameters_text_reinitializeaccount), color = Color.Red, fontWeight = FontWeight.Bold, fontSize = 16.sp)
                     }
                 }
 
@@ -125,31 +128,31 @@ fun Settings(navController: NavController) {
                         // Custom layout for dialog
                         Surface(
                             shape = RoundedCornerShape(8.dp),
-                            color = Color(0xFFF1F1F1), // Light gray
-                            border = BorderStroke(2.dp, Color(0xFF333333)), // Dark gray
+                            color = Color(0xFFF1F1F1),
+                            border = BorderStroke(2.dp, Color(0xFF333333)),
                             modifier = Modifier
-                                .fillMaxWidth(0.8f) // Fill 80% of the screen width
+                                .widthIn(max = 300.dp)
                                 .padding(16.dp)
                         ) {
                             Column(
                                 modifier = Modifier.padding(16.dp),
                                 horizontalAlignment = Alignment.CenterHorizontally
                             ) {
-                                Text(text = "Réinitialiser le compte", fontWeight = FontWeight.Bold, color = Color.Black)
-                                Text(text = "Êtes-vous sûr ?", color = Color.Black)
-                                Spacer(modifier = Modifier.height(16.dp))
+                                Text(text = stringResource(id = R.string.parameters_text_reinitializeaccount), fontWeight = FontWeight.Bold, color = Color.Black)
+                                Text(text = stringResource(id = R.string.parameters_dialog_areYouSure), color = Color.Black)
+                                Spacer(modifier = Modifier.height(20.dp))
                                 Button(
                                     onClick = { /* Réinitialiser le compte */ },
                                     colors = ButtonDefaults.buttonColors(backgroundColor = Color.Red)
                                 ) {
-                                    Text("Oui", color = Color.White)
+                                    Text(stringResource(id = R.string.yes), color = Color.White)
                                 }
                                 Spacer(modifier = Modifier.height(16.dp))
                                 Button(
                                     onClick = { showDialog = false },
                                     colors = ButtonDefaults.buttonColors(backgroundColor = Color(0xFF6200EE))
                                 ) {
-                                    Text("Non", color = Color.White)
+                                    Text(stringResource(id = R.string.no), color = Color.White)
                                 }
                             }
                         }

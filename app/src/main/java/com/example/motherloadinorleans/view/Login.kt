@@ -90,8 +90,8 @@ fun LoginPage(navController: NavController) {
                         OutlinedTextField(
                             value = emailVal.value,
                             onValueChange = { emailVal.value = it },
-                            label = { Text(text = "Email Address", color = Black) },
-                            placeholder = { Text(text = "Email Address", color = Black) },
+                            label = { Text(text = stringResource(id = R.string.login_text_email), color = Black) },
+                            placeholder = { Text(text = stringResource(id = R.string.login_text_email), color = Black) },
                             singleLine = true,
                             modifier = Modifier.fillMaxWidth(0.8f),
                             colors = TextFieldDefaults.outlinedTextFieldColors(
@@ -111,13 +111,13 @@ fun LoginPage(navController: NavController) {
                                 }) {
                                     Icon(
                                         painter = painterResource(R.drawable.ic_baseline_remove_red_eye_24),
-                                        contentDescription = "Password",
+                                        contentDescription = stringResource(id = R.string.login_text_password),
                                         tint = if (passwordVisiblity.value) Purple500 else Color.Gray
                                     )
                                 }
                             },
-                            label = { Text(text = "Password", color = Black) },
-                            placeholder = { Text(text = "Password", color = Black) },
+                            label = { Text(text = stringResource(id = R.string.login_text_password), color = Black) },
+                            placeholder = { Text(text = stringResource(id = R.string.login_text_password), color = Black) },
                             singleLine = true,
                             visualTransformation = if (passwordVisiblity.value) VisualTransformation.None else PasswordVisualTransformation(),
                             modifier = Modifier.fillMaxWidth(0.8f)
@@ -155,7 +155,7 @@ fun LoginPage(navController: NavController) {
                                             } else {
                                                 Toast.makeText(
                                                     context,
-                                                    "logged error !",
+                                                    "Logged error !",
                                                     Toast.LENGTH_LONG
                                                 ).show()
                                             }
@@ -167,7 +167,7 @@ fun LoginPage(navController: NavController) {
                                 .fillMaxWidth(0.8f)
                                 .height(50.dp)
                         ) {
-                            Text(text = "Sign In", fontSize = 20.sp,color = Black)
+                            Text(text = stringResource(id = R.string.login_text_signin), fontSize = 20.sp,color = Black)
                         }
 
 

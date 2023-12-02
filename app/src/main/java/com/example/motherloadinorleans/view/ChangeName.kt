@@ -29,10 +29,12 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Color.Companion.White
 import androidx.compose.ui.graphics.Color.Companion.Black
 import androidx.compose.ui.graphics.Color.Companion.Red
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.motherloadinorleans.R
 import com.example.motherloadinorleans.ui.theme.Purple500
 
 @Composable
@@ -48,7 +50,7 @@ fun ChangeName(navController: NavController) {
                     IconButton(onClick = {
                         navController.navigate("settings_page")
                     }) {
-                        Icon(Icons.Filled.ArrowBack, contentDescription = "Retour")
+                        Icon(Icons.Filled.ArrowBack, contentDescription = stringResource(id = R.string.parameters_button_return))
                     }
                 },
                 backgroundColor = Color.White,
@@ -64,7 +66,7 @@ fun ChangeName(navController: NavController) {
                     .padding(top = 32.dp, start = 16.dp, end = 16.dp),
             ) {
                 Text(
-                    text = "Changer de nom",
+                    text = stringResource(id = R.string.changename_text_changename),
                     fontWeight = FontWeight.Bold,
                     fontSize = 30.sp,
                     color = Black,
@@ -73,7 +75,7 @@ fun ChangeName(navController: NavController) {
                 TextField(
                     value = "",
                     onValueChange = { },
-                    label = { Text("Nouveau nom") },
+                    label = { Text(stringResource(id = R.string.changename_edit_newname)) },
                     colors = TextFieldDefaults.textFieldColors(
                         backgroundColor = Color.White,
                         focusedIndicatorColor = Purple500,
@@ -95,7 +97,7 @@ fun ChangeName(navController: NavController) {
                         contentColor = Color.White
                     )
                 ) {
-                    Text(text = "Changer de nom")
+                    Text(text = stringResource(id = R.string.changename_text_changename))
                 }
             }
         }

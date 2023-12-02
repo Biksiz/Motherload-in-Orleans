@@ -1,4 +1,24 @@
 <resources>
     <string name="app_name">MotherloadInOrleans</string>
     <string name="login_text_login">Login</string>
+    <string name="login_text_email">Email Address</string>
+    <string name="login_text_password">Password</string>
+    <string name="login_text_signin">Sign In</string>
+    <string name="login_msg_emailEmpty">Please enter Email Address !</string>
+    <string name="login_msg_passwordEmpty">Please entre the password !</string>
+    <string name="login_msg_success">Logged Successfully !</string>
+    <string name="login_msg_error">Logged Error !</string>
+    <string name="menu_text_parameters">Parameters</string>
+    <string name="menu_text_store">Store</string>
+    <string name="menu_text_workshop">Workshop</string>
+    <string name="menu_text_play">Play</string>
+    <string name="parameters_text_parameters">Parameters</string>
+    <string name="parameters_text_changename">Change your name</string>
+    <string name="parameters_text_reinitializeaccount">Reset your account</string>
+    <string name="changename_text_changename">Change your name</string>
+    <string name="changename_edit_newname">New name</string>
+    <string name="parameters_button_return">Return</string>
+    <string name="parameters_dialog_areYouSure">Are you sure ?</string>
+    <string name="yes">Yes</string>
+    <string name="no">No</string>
 </resources>

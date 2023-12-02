@@ -23,6 +23,7 @@ import androidx.compose.ui.graphics.Color.Companion.White
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -45,7 +46,7 @@ fun Menu(navController: NavController) {
                     IconButton(onClick = {
                         navController.navigate("settings_page")
                     }) {
-                        Icon(Icons.Filled.Settings, contentDescription = "Paramètres")
+                        Icon(Icons.Filled.Settings, contentDescription = stringResource(id = R.string.menu_text_parameters))
                     }
                 },
                 backgroundColor = Color.White,
@@ -77,8 +78,8 @@ fun Menu(navController: NavController) {
                             },
                             modifier = Modifier.weight(1f)) {
                             Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                                Icon(Icons.Filled.ShoppingCart, contentDescription = "Magasin")
-                                Text("Magasin")
+                                Icon(Icons.Filled.ShoppingCart, contentDescription = stringResource(id = R.string.menu_text_store))
+                                Text(stringResource(id = R.string.menu_text_store))
                             }
                         }
 
@@ -90,8 +91,8 @@ fun Menu(navController: NavController) {
                             },
                             modifier = Modifier.weight(1f)) {
                             Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                                Icon(Icons.Filled.Build, contentDescription = "Atelier")
-                                Text("Atelier")
+                                Icon(Icons.Filled.Build, contentDescription = stringResource(id = R.string.menu_text_workshop))
+                                Text(stringResource(id = R.string.menu_text_workshop))
                             }
                         }
                     }
@@ -106,8 +107,8 @@ fun Menu(navController: NavController) {
                         colors = ButtonDefaults.buttonColors(backgroundColor = Color.Red, contentColor = Color.White)
                     ) {
                         Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                            Icon(Icons.Filled.PlayArrow, contentDescription = "Jouer")
-                            Text("Jouer")
+                            Icon(Icons.Filled.PlayArrow, contentDescription = stringResource(id = R.string.menu_text_play))
+                            Text(stringResource(id = R.string.menu_text_play))
                         }
                     }
                 }
