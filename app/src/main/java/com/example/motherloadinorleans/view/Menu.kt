@@ -40,7 +40,7 @@ fun Menu(navController: NavController) {
     val scaffoldState = rememberScaffoldState()
 
     val sharedPref = context.getSharedPreferences("MyPrefs", Context.MODE_PRIVATE)
-    val username = sharedPref.getString("username", "") ?: ""
+    val username = sharedPref.getString("name", "") ?: ""
 
     Scaffold(
         topBar = {

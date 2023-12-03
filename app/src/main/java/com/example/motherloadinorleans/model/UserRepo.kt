@@ -94,6 +94,7 @@ class UserRepo  private constructor() {
                                         putString("password", password)
                                         putString("session", session)
                                         putString("signature", signature)
+                                        putString("name", username)
                                         apply()
                                     }
                                     callback(true)
@@ -161,5 +162,46 @@ class UserRepo  private constructor() {
 
         MotherlandApplication.instance.requestQueue?.add(stringRequest)
     }
+
+    fun change_username(session: String, signature: String, nom: String, callback: (Boolean) -> Unit){
+        val encodedSession = URLEncoder.encode(session, "UTF-8")
+        val encodedSignature = URLEncoder.encode(signature, "UTF-8")
+        val encodedNom = URLEncoder.encode(nom, "UTF-8")
+        val url = BASE_URL+"changenom.php?session=$encodedSession&signature=$encodedSignature&nom=$encodedNom"
+
+        val stringRequest = StringRequest(
+            Request.Method.GET, url,
+            { response ->
+                try {
+                    val docBF: DocumentBuilderFactory = DocumentBuilderFactory.newInstance()
+                    val docBuilder: DocumentBuilder = docBF.newDocumentBuilder()
+                    val doc: Document = docBuilder.parse(response.byteInputStream())
+
+                    val statusNode = doc.getElementsByTagName("STATUS").item(0)
+                    if (statusNode != null) {
+                        val status = statusNode.textContent.trim()
+
+                        if (status == "OK") {
+                            Log.d(TAG, "Changement de nom réussi !")
+                            callback(true)
+                        } else {
+                            Log.e(TAG, "changement de nom : Erreur - $status")
+                            callback(false)
+                        }
+                    }
+                } catch (e: Exception) {
+                    Log.e(TAG,"Erreur lors de la lecture de la réponse XML", e)
+                    callback(false)
+                }
+            },
+            { error ->
+                Log.d(TAG,"changement de nom error")
+                error.printStackTrace()
+                callback(false)
+            })
+
+        MotherlandApplication.instance.requestQueue?.add(stringRequest)
+    }
+
 
 }

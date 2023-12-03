@@ -1,5 +1,7 @@
 package com.example.motherloadinorleans.view
 
+import android.content.Context
+import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -23,6 +25,8 @@ import androidx.compose.material.icons.filled.AccountCircle
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Settings
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -35,12 +39,20 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.motherloadinorleans.R
+import com.example.motherloadinorleans.model.UserRepo
 import com.example.motherloadinorleans.ui.theme.Purple500
 
 @Composable
 fun ChangeName(navController: NavController) {
     val context = LocalContext.current
     val scaffoldState = rememberScaffoldState()
+    val nameVal = remember { mutableStateOf("") }
+
+    val repository = UserRepo.getInstance()
+
+    val sharedPref = context.getSharedPreferences("MyPrefs", Context.MODE_PRIVATE)
+    val session = sharedPref.getString("session", "") ?: ""
+    val signature = sharedPref.getString("signature", "") ?: ""
 
     Scaffold(
         topBar = {
@@ -73,9 +85,10 @@ fun ChangeName(navController: NavController) {
                     modifier = Modifier.padding(bottom = 24.dp)
                 )
                 TextField(
-                    value = "",
-                    onValueChange = { },
+                    value = nameVal.value,
+                    onValueChange = { nameVal.value = it },
                     label = { Text(stringResource(id = R.string.changename_edit_newname)) },
+                    placeholder = { Text(stringResource(id = R.string.changename_edit_newname)) },
                     colors = TextFieldDefaults.textFieldColors(
                         backgroundColor = Color.White,
                         focusedIndicatorColor = Purple500,
@@ -88,7 +101,39 @@ fun ChangeName(navController: NavController) {
                 )
                 Spacer(modifier = Modifier.padding(20.dp))
                 Button(
-                    onClick = { },
+                    onClick = {
+                      when {
+                          nameVal.value.isEmpty() -> {
+                              Toast.makeText(
+                                  context,
+                                  "Please enter the new name !",
+                                  Toast.LENGTH_LONG
+                              ).show()
+                          }
+                          else -> {
+                              repository.change_username(session, signature, nameVal.value) { success ->
+                                  if (success) {
+                                      with(sharedPref.edit()) {
+                                          putString("name", nameVal.value)
+                                          apply()
+                                      }
+                                      navController.navigate("settings_page")
+                                      Toast.makeText(
+                                          context,
+                                          "Name changed !",
+                                          Toast.LENGTH_LONG
+                                      ).show()
+                                  } else {
+                                      Toast.makeText(
+                                          context,
+                                          "Error while changing name !",
+                                          Toast.LENGTH_LONG
+                                      ).show()
+                                  }
+                              }
+                          }
+                      }
+                    },
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(start = 20.dp, top = 0.dp, bottom = 20.dp, end = 20.dp),
