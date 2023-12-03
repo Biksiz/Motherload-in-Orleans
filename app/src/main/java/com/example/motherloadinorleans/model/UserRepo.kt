@@ -1,5 +1,6 @@
 package com.example.motherloadinorleans.model
 
+import android.content.Context
 import android.util.Log
 import com.android.volley.toolbox.StringRequest
 import java.net.URLEncoder
@@ -87,6 +88,14 @@ class UserRepo  private constructor() {
                                     println("session : $session")
                                     println("signature : $signature")
                                     Log.d(TAG, "Connexion réussie !")
+                                    val sharedPref = MotherlandApplication.instance.getSharedPreferences("MyPrefs", Context.MODE_PRIVATE)
+                                    with (sharedPref.edit()) {
+                                        putString("username", username)
+                                        putString("password", password)
+                                        putString("session", session)
+                                        putString("signature", signature)
+                                        apply()
+                                    }
                                     callback(true)
                                 }
                             } else {
