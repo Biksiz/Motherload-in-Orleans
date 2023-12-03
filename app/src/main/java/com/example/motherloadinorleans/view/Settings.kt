@@ -1,5 +1,7 @@
 package com.example.motherloadinorleans.view
 
+import android.content.Context
+import android.widget.Toast
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -46,6 +48,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.window.Dialog
 import com.example.motherloadinorleans.R
+import com.example.motherloadinorleans.model.UserRepo
 
 
 @Composable
@@ -53,6 +56,12 @@ fun Settings(navController: NavController) {
     val context = LocalContext.current
     val scaffoldState = rememberScaffoldState()
     var showDialog by remember { mutableStateOf(false) }
+
+    val repository = UserRepo.getInstance()
+
+    val sharedPref = context.getSharedPreferences("MyPrefs", Context.MODE_PRIVATE)
+    val session = sharedPref.getString("session", "") ?: ""
+    val signature = sharedPref.getString("signature", "") ?: ""
 
     Scaffold(
         topBar = {
@@ -142,7 +151,28 @@ fun Settings(navController: NavController) {
                                 Text(text = stringResource(id = R.string.parameters_dialog_areYouSure), color = Color.Black)
                                 Spacer(modifier = Modifier.height(20.dp))
                                 Button(
-                                    onClick = { /* Réinitialiser le compte */ },
+                                    onClick = {
+                                                repository.reinitialize_account(session, signature) { success ->
+                                                    if (success) {
+                                                        showDialog = false
+                                                        Toast.makeText(
+                                                            context,
+                                                            "Reinitialization successful",
+                                                            Toast.LENGTH_LONG
+                                                        ).show()
+                                                        navController.navigate("login_page") {
+                                                            popUpTo("menu_page") { inclusive = true }
+                                                        }
+                                                    } else {
+                                                        showDialog = false
+                                                        Toast.makeText(
+                                                            context,
+                                                            "Reinitialization failed",
+                                                            Toast.LENGTH_LONG
+                                                        ).show()
+                                                    }
+                                                }
+                                            },
                                     colors = ButtonDefaults.buttonColors(backgroundColor = Color.Red)
                                 ) {
                                     Text(stringResource(id = R.string.yes), color = Color.White)

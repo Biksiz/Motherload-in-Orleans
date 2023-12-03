@@ -149,7 +149,7 @@ fun LoginPage(navController: NavController) {
                                                 navController.navigate("menu_page")
                                                 Toast.makeText(
                                                     context,
-                                                    "Logged Successfully!",
+                                                    "Logged Successfully !",
                                                     Toast.LENGTH_LONG
                                                 ).show()
                                             } else {
@@ -169,7 +169,6 @@ fun LoginPage(navController: NavController) {
                         ) {
                             Text(text = stringResource(id = R.string.login_text_signin), fontSize = 20.sp,color = Black)
                         }
-
 
 
                     }

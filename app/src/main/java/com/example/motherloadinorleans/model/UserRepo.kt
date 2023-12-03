@@ -123,5 +123,43 @@ class UserRepo  private constructor() {
     }
 
 
+    fun reinitialize_account(session: String, signature: String, callback: (Boolean) -> Unit){
+        val encodedSession = URLEncoder.encode(session, "UTF-8")
+        val encodedSignature = URLEncoder.encode(signature, "UTF-8")
+        val url = BASE_URL+"reinit_joueur.php?session=$encodedSession&signature=$encodedSignature"
+
+        val stringRequest = StringRequest(
+            Request.Method.GET, url,
+            { response ->
+                try {
+                    val docBF: DocumentBuilderFactory = DocumentBuilderFactory.newInstance()
+                    val docBuilder: DocumentBuilder = docBF.newDocumentBuilder()
+                    val doc: Document = docBuilder.parse(response.byteInputStream())
+
+                    val statusNode = doc.getElementsByTagName("STATUS").item(0)
+                    if (statusNode != null) {
+                        val status = statusNode.textContent.trim()
+
+                        if (status == "OK") {
+                            Log.d(TAG, "Réinitialisation réussie !")
+                            callback(true)
+                        } else {
+                            Log.e(TAG, "Réinitialisation : Erreur - $status")
+                            callback(false)
+                        }
+                    }
+                } catch (e: Exception) {
+                    Log.e(TAG,"Erreur lors de la lecture de la réponse XML", e)
+                    callback(false)
+                }
+            },
+            { error ->
+                Log.d(TAG,"Réinitialisation error")
+                error.printStackTrace()
+                callback(false)
+            })
+
+        MotherlandApplication.instance.requestQueue?.add(stringRequest)
+    }
 
 }

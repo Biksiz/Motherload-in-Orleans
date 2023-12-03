@@ -1,5 +1,6 @@
 package com.example.motherloadinorleans.view
 
+import android.content.Context
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -38,6 +39,9 @@ fun Menu(navController: NavController) {
     val context = LocalContext.current
     val scaffoldState = rememberScaffoldState()
 
+    val sharedPref = context.getSharedPreferences("MyPrefs", Context.MODE_PRIVATE)
+    val username = sharedPref.getString("username", "") ?: ""
+
     Scaffold(
         topBar = {
             TopAppBar(
@@ -66,6 +70,8 @@ fun Menu(navController: NavController) {
                     verticalArrangement = Arrangement.Center,
                     modifier = Modifier.fillMaxWidth()
                 ) {
+                    Text(stringResource(id = R.string.menu_text_welcome) + " $username !", fontSize = 30.sp, modifier = Modifier.align(Alignment.CenterHorizontally))
+                    Spacer(modifier = Modifier.height(16.dp))
                     Row(
                         modifier = Modifier
                             .fillMaxWidth()

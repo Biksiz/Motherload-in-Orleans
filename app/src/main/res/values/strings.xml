@@ -21,4 +21,6 @@
     <string name="parameters_dialog_areYouSure">Are you sure ?</string>
     <string name="yes">Yes</string>
     <string name="no">No</string>
+    <string name="menu_text_welcome">Welcome</string>
+    <string name="parameters_dialog_error">Reinitialization error</string>
 </resources>
