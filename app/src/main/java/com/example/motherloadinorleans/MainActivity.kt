@@ -19,6 +19,8 @@ import com.example.motherloadinorleans.view.ChangeName
 import com.example.motherloadinorleans.view.LoginPage
 import com.example.motherloadinorleans.view.Menu
 import com.example.motherloadinorleans.view.Settings
+import com.example.motherloadinorleans.view.Store
+import com.example.motherloadinorleans.view.Sale
 
 class MainActivity : ComponentActivity() {
 
@@ -57,6 +59,8 @@ fun navigatePage() {
             composable("menu_page", content = { Menu(navController = navController) })
             composable("settings_page", content = { Settings(navController = navController) })
             composable("change_name_page", content = { ChangeName(navController = navController) })
+            composable("store_page", content = { Store(navController = navController) })
+            composable("sale_page", content = { Store(navController = navController) })
         }
     )
 }
