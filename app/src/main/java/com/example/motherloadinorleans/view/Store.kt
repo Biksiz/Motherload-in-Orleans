@@ -1,5 +1,11 @@
 package com.example.motherloadinorleans.view
 
+import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.material.Button
 import androidx.compose.material.Icon
 import androidx.compose.material.IconButton
 import androidx.compose.material.Scaffold
@@ -18,6 +24,14 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.example.motherloadinorleans.R
+import androidx.compose.ui.Modifier
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
+import androidx.compose.material.ButtonDefaults
+import androidx.compose.ui.Alignment
+import com.example.motherloadinorleans.navigatePage
+
 
 @Composable
 fun Store(navController: NavController) {
@@ -41,7 +55,43 @@ fun Store(navController: NavController) {
             )
         },
         content = {
-            // TODO: Implement store
+            Column(
+                modifier= Modifier.fillMaxSize(),
+                horizontalAlignment= Alignment.CenterHorizontally
+            ) {
+                Row(
+                    horizontalArrangement= Arrangement.Center,
+                    modifier= Modifier.padding(16.dp)
+                ) {
+                    Button(
+                        onClick = {
+                            /*rien*/
+                        },
+                        colors = ButtonDefaults.buttonColors(
+                            backgroundColor = Color(0xFF4C9DFF),
+                            contentColor = Color.White
+                        ),
+                        border = BorderStroke(1.dp, Color.Black)
+                    ) {
+                        Text("Acheter")
+                    }
+
+                    Spacer(modifier= Modifier.width(1.dp)) // Espace optionnel entre les boutons
+
+                    Button(
+                        onClick = {
+                            navController.navigate("sale_page")
+                        },
+                        colors = ButtonDefaults.buttonColors(
+                            backgroundColor = Color(0xFF005CE7),
+                            contentColor = Color.White
+                        )
+                    ) {
+                        Text("Vendre")
+                    }
+                }
+                Text(text = "Acheter: à compléter")
+            }
         }
     )
 }

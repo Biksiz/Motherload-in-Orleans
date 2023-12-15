@@ -80,7 +80,7 @@ fun Menu(navController: NavController) {
                     ) {
                         Button(
                             onClick = {
-                                /*Navigation page*/
+                                navController.navigate("store_page")
                             },
                             modifier = Modifier.weight(1f)) {
                             Column(horizontalAlignment = Alignment.CenterHorizontally) {
