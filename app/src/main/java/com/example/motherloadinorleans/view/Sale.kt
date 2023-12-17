@@ -95,5 +95,5 @@ fun Sale(navController: NavController) {
 @Preview
 @Composable
 fun SalePreview() {
-    Store(navController = NavController(LocalContext.current))
+    Sale(navController = NavController(LocalContext.current))
 }
