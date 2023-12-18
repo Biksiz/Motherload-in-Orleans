@@ -14,6 +14,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import com.example.motherloadinorleans.model.StoreRepo
 import com.example.motherloadinorleans.ui.theme.MotherLoadInOrleansComposeTheme
 import com.example.motherloadinorleans.view.ChangeName
 import com.example.motherloadinorleans.view.LoginPage
@@ -59,7 +60,7 @@ fun navigatePage() {
             composable("menu_page", content = { Menu(navController = navController) })
             composable("settings_page", content = { Settings(navController = navController) })
             composable("change_name_page", content = { ChangeName(navController = navController) })
-            composable("store_page", content = { Store(navController = navController) })
+            composable("store_page", content = { Store(navController = navController, storeRepo = StoreRepo.instance) })
             composable("sale_page", content = { Sale(navController = navController) })
         }
     )

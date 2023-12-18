@@ -15,6 +15,8 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.rememberScaffoldState
 import androidx.compose.runtime.Composable
+import androidx.compose.foundation.Image
+
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.graphics.Color
@@ -26,15 +28,85 @@ import androidx.navigation.NavController
 import com.example.motherloadinorleans.R
 import androidx.compose.ui.Modifier
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.ButtonDefaults
+import androidx.compose.material.Card
+import androidx.compose.material.icons.filled.Info
+import androidx.compose.material.icons.filled.ShoppingCart
+import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.res.painterResource
+import coil.compose.rememberImagePainter
+import com.example.motherloadinorleans.model.Offer
+import com.example.motherloadinorleans.model.StoreRepo
 import com.example.motherloadinorleans.navigatePage
 
 
 @Composable
-fun Store(navController: NavController) {
+fun StoreScreen(storeViewModel: StoreRepo) {
+    val offers = storeViewModel.offers.observeAsState(listOf())
+
+    LazyColumn {
+        items(offers.value) { offer ->
+            OfferItem(offer = offer)
+        }
+    }
+}
+
+@Composable
+fun OfferItem(offer: Offer) {
+    val backgroundColor = when (offer.item?.rarity) {
+        1 -> Color.Gray
+        2 -> Color.Green
+        3 -> Color.Blue
+        4 -> Color.Magenta
+        5 -> Color.Yellow
+        else -> Color.White
+    }
+    val imageUrl = "https://test.vautard.fr/creuse_imgs/${offer.item?.imageUrl}"
+    val imageModifier = Modifier
+        .size(60.dp)
+        .clip(RoundedCornerShape(8.dp))
+    Card(backgroundColor = backgroundColor,modifier = Modifier.fillMaxWidth().padding(8.dp)) {
+        Row(modifier = Modifier.padding(16.dp)) {
+            Image(
+                painter = rememberImagePainter(
+                    data = imageUrl,
+                    builder = {
+                        error(R.drawable.error_placeholder)
+                        placeholder(R.drawable.loading_placeholder)
+                    }
+                ),
+                contentDescription = "Item Image",
+                modifier = imageModifier
+            )
+
+            Column(modifier = Modifier.padding(start = 8.dp).weight(1f)) {
+                Text(text = "Nom: ${offer.item?.name}")
+                Text(text = "Quantité: ${offer.quantity}")
+                Text(text = "Prix: ${offer.price}")
+            }
+
+            IconButton(onClick = { /* TODO: Afficher les détails de l'item */ }) {
+                Icon(Icons.Filled.Info, contentDescription = "Info")
+            }
+
+            Button(onClick = { /* TODO: Gérer l'achat de l'item */ }) {
+                Icon(Icons.Filled.ShoppingCart, contentDescription = stringResource(id = R.string.menu_text_store))
+            }
+        }
+    }
+}
+
+@Composable
+fun Store(navController: NavController, storeRepo: StoreRepo) {
     val context = LocalContext.current
     val scaffoldState = rememberScaffoldState()
 
@@ -90,7 +162,7 @@ fun Store(navController: NavController) {
                         Text("Vendre")
                     }
                 }
-                Text(text = "Acheter: à compléter")
+                StoreScreen(storeViewModel = storeRepo)
             }
         }
     )
@@ -99,5 +171,5 @@ fun Store(navController: NavController) {
 @Preview
 @Composable
 fun StorePreview() {
-    Store(navController = NavController(LocalContext.current))
+    Store(navController = NavController(LocalContext.current), storeRepo = StoreRepo.instance)
 }
