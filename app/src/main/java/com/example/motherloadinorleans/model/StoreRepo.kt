@@ -34,8 +34,6 @@ class StoreRepo private constructor() {
     val signature = sharedPref.getString("signature", "") ?: ""
 
     init {
-
-        Log.e(TAG , "on là les zbi: $session , $signature")
         recupererOffres(session, signature)
     }
 
@@ -192,12 +190,46 @@ class StoreRepo private constructor() {
         MotherlandApplication.instance.requestQueue?.add(stringRequest)
     }
 
-    private fun acheterItem(offerId: String) {
-        // à completer
+    fun acheterItem(session: String?, signature: String?, offerId: String?, callback: (String) -> Unit) {
+        val encodedSession = URLEncoder.encode(session, "UTF-8")
+        val encodedSignature = URLEncoder.encode(signature, "UTF-8")
+        val encodedOfferId = URLEncoder.encode(offerId, "UTF-8")
+        val url = BASE_URL+"market_acheter.php?session=$encodedSession&signature=$encodedSignature&offer_id=$encodedOfferId"
 
+        val stringRequest = StringRequest(
+            Request.Method.GET, url,
+            { response ->
+                try {
+                    val docBF: DocumentBuilderFactory = DocumentBuilderFactory.newInstance()
+                    val docBuilder: DocumentBuilder = docBF.newDocumentBuilder()
+                    val doc: Document = docBuilder.parse(response.byteInputStream())
+
+                    val statusNode = doc.getElementsByTagName("STATUS").item(0)
+                    if (statusNode != null) {
+                        val status = statusNode.textContent.trim()
+                        if (status == "OK") {
+                            Log.d(TAG, "Achat réussi !")
+                            callback("OK")
+                        } else {
+                            Log.e(TAG, "Achat : Erreur - $status")
+                            callback(status)
+                        }
+                    }
+                } catch (e: Exception) {
+                    Log.e(TAG,"Erreur lors de la lecture de la réponse XML", e)
+                    callback("ERROR")
+                }
+            },
+            { error ->
+                Log.d(TAG,"Achat error")
+                error.printStackTrace()
+                callback("ERROR")
+            })
+
+        MotherlandApplication.instance.requestQueue?.add(stringRequest)
     }
 
-    private fun miseAJourAcheter(offerId: String) {
+    fun miseAJourAcheter(offerId: String?) {
         val updatedOffers = _offers.value?.filterNot { it.offerId == offerId }
         _offers.postValue(updatedOffers)
     }

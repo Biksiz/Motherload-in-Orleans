@@ -1,5 +1,7 @@
 package com.example.motherloadinorleans.view
 
+import android.content.Context
+import android.widget.Toast
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -16,6 +18,7 @@ import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.rememberScaffoldState
 import androidx.compose.runtime.Composable
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.border
 
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -29,6 +32,7 @@ import com.example.motherloadinorleans.R
 import androidx.compose.ui.Modifier
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -37,16 +41,19 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.ButtonDefaults
 import androidx.compose.material.Card
+import androidx.compose.material.MaterialTheme
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.ShoppingCart
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.window.Dialog
 import coil.compose.rememberImagePainter
 import com.example.motherloadinorleans.model.Offer
 import com.example.motherloadinorleans.model.StoreRepo
 import com.example.motherloadinorleans.navigatePage
+import java.util.Locale
 
 
 @Composable
@@ -55,13 +62,25 @@ fun StoreScreen(storeViewModel: StoreRepo) {
 
     LazyColumn {
         items(offers.value) { offer ->
-            OfferItem(offer = offer)
+            OfferItem(offer = offer, storeViewModel = storeViewModel)
         }
     }
 }
 
 @Composable
-fun OfferItem(offer: Offer) {
+fun OfferItem(offer: Offer, storeViewModel: StoreRepo) {
+    val context = LocalContext.current
+
+    val sharedPref = context.getSharedPreferences("MyPrefs", Context.MODE_PRIVATE)
+    val session = sharedPref.getString("session", "") ?: ""
+    val signature = sharedPref.getString("signature", "") ?: ""
+
+    val showDetailsDialog = remember { mutableStateOf(false) }
+
+    if (showDetailsDialog.value) {
+        ItemDetailsDialog(offer = offer, onDismiss = { showDetailsDialog.value = false })
+    }
+
     val backgroundColor = when (offer.item?.rarity) {
         1 -> Color.Gray
         2 -> Color.Green
@@ -94,12 +113,57 @@ fun OfferItem(offer: Offer) {
                 Text(text = "Prix: ${offer.price}")
             }
 
-            IconButton(onClick = { /* TODO: Afficher les détails de l'item */ }) {
+            IconButton(onClick = { showDetailsDialog.value = true }) {
                 Icon(Icons.Filled.Info, contentDescription = "Info")
             }
 
-            Button(onClick = { /* TODO: Gérer l'achat de l'item */ }) {
+            Button(onClick = {
+                StoreRepo.instance.acheterItem(session, signature, offer.offerId ?: "") { success ->
+                    if (success == "OK") {
+                        Toast.makeText(context, "Achat réussi !", Toast.LENGTH_SHORT).show()
+                        StoreRepo.instance.miseAJourAcheter(offer.offerId ?: "")
+                    }
+                    else if (success == "KO - NO MONEY") {
+                        Toast.makeText(context, "Pas assez de solde !", Toast.LENGTH_SHORT).show()
+                    }
+                    else if (success == "KO - UNKNOWN ID") {
+                        Toast.makeText(context, "L'offre n'existe plus !", Toast.LENGTH_SHORT).show()
+                    }
+                    else {
+                        Toast.makeText(context, "Erreur lors de l'achat !", Toast.LENGTH_SHORT).show()
+                    }
+                }
+            }) {
                 Icon(Icons.Filled.ShoppingCart, contentDescription = stringResource(id = R.string.menu_text_store))
+            }
+        }
+    }
+}
+
+@Composable
+fun ItemDetailsDialog(offer: Offer, onDismiss: () -> Unit) {
+    val imageUrl = "https://test.vautard.fr/creuse_imgs/${offer.item?.imageUrl}"
+    val isFrench = Locale.getDefault().language == Locale.FRENCH.language
+    val description = if (isFrench) offer.item?.descFr else offer.item?.descEn
+
+    Dialog(onDismissRequest = onDismiss) {
+        Card(modifier = Modifier.fillMaxWidth().border(1.dp, Color.Black)) {
+            Column(modifier = Modifier.padding(16.dp)) {
+                Text("Détails de l'item", style = MaterialTheme.typography.h6)
+                Spacer(Modifier.height(8.dp))
+                Image(
+                    painter = rememberImagePainter(data = imageUrl),
+                    contentDescription = "Item Image",
+                    modifier = Modifier.size(128.dp).align(Alignment.CenterHorizontally)
+                )
+                Spacer(Modifier.height(8.dp))
+                Text("Nom: ${offer.item?.name}")
+                Text("Type: ${offer.item?.type}")
+                Text("Rareté: ${offer.item?.rarity}")
+                Text("Description: $description")
+                Button(onClick = onDismiss, modifier = Modifier.align(Alignment.CenterHorizontally)) {
+                    Text("FERMER")
+                }
             }
         }
     }
