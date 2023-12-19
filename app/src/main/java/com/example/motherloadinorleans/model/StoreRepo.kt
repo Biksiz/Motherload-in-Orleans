@@ -18,6 +18,7 @@ import java.net.URLEncoder
 import javax.xml.parsers.DocumentBuilder
 import javax.xml.parsers.DocumentBuilderFactory
 
+
 import androidx.compose.ui.platform.LocalContext
 import java.util.concurrent.CountDownLatch
 
@@ -27,6 +28,8 @@ class StoreRepo private constructor() {
     private val BASE_URL = "https://test.vautard.fr/creuse_srv/"
     private val userRepo = UserRepo.getInstance()
     private val _offers = MutableLiveData<List<Offer>>()
+    private val _inventaire = MutableLiveData<List<Item>>()
+    private var _money = 0;
     val offers: LiveData<List<Offer>> = _offers
 
     val sharedPref = MotherlandApplication.instance.getSharedPreferences("MyPrefs", Context.MODE_PRIVATE)
@@ -35,6 +38,7 @@ class StoreRepo private constructor() {
 
     init {
         recupererOffres(session, signature)
+        getStatutDuJoueur(session, signature)
     }
 
     companion object {
@@ -232,6 +236,83 @@ class StoreRepo private constructor() {
     fun miseAJourAcheter(offerId: String?) {
         val updatedOffers = _offers.value?.filterNot { it.offerId == offerId }
         _offers.postValue(updatedOffers)
+    }
+
+    fun getStatutDuJoueur(session: String?, signature: String?) {
+        val encodedSession = URLEncoder.encode(session, "UTF-8")
+        val encodedSignature = URLEncoder.encode(signature, "UTF-8")
+        val url = BASE_URL+"status_joueur.php?session=$encodedSession&signature=$encodedSignature"
+        val itemsListe = ArrayList<Item>()
+        val stringRequest = StringRequest(
+            Request.Method.GET, url,
+            { response ->
+                try {
+                    val docBF: DocumentBuilderFactory = DocumentBuilderFactory.newInstance()
+                    val docBuilder: DocumentBuilder = docBF.newDocumentBuilder()
+                    val doc: Document = docBuilder.parse(response.byteInputStream())
+
+                    val statusNode = doc.getElementsByTagName("STATUS").item(0)
+                    if (statusNode != null) {
+                        val status = statusNode.textContent.trim()
+                        if (status == "OK") {
+                            val moneyNode = doc.getElementsByTagName("MONEY").item(0)
+                            _money = moneyNode.textContent.trim().toInt()
+                            Log.e(TAG, "money : $_money")
+
+                            val itemsNode = doc.getElementsByTagName("ITEMS").item(0)
+                            val listeitems = itemsNode.childNodes
+                            Log.e(TAG, "itemsNode  : $itemsNode")
+
+                            val itemListIterable = (0 until listeitems.length).map { listeitems.item(it) }
+                            val countDownLatch = CountDownLatch(itemListIterable.size)
+                            if (itemListIterable.isEmpty()) {
+                                _inventaire.postValue(itemsListe)
+                            }
+
+                            if (itemsNode != null && itemsNode.nodeType == Node.ELEMENT_NODE) {
+                                Log.e(TAG, "ItemsListIterable  : $itemListIterable")
+                                itemListIterable.forEach{ item ->
+                                    val elem = item as Element
+                                    val objet = Item(
+                                        elem.getElementsByTagName("ITEM_ID").item(0)?.textContent,
+                                        elem.getElementsByTagName("NOM").item(0)?.textContent,
+                                        elem.getElementsByTagName("TYPE").item(0)?.textContent,
+                                        elem.getElementsByTagName("RARETE").item(0)?.textContent?.toInt(),
+                                        elem.getElementsByTagName("IMAGE").item(0)?.textContent,
+                                        elem.getElementsByTagName("DESC_FR").item(0)?.textContent,
+                                        elem.getElementsByTagName("DESC_EN").item(0)?.textContent
+                                    )
+                                    itemsListe.add(objet)
+                                }
+                            }
+                            else {
+                                Log.e(TAG, "Noeud 'ITEMS' introuvable dans la réponse XML")
+                            }
+                            Thread {
+                                try {
+                                    countDownLatch.await()
+                                    _inventaire.postValue(itemsListe)
+                                    Log.e(TAG, "ITEMS 1: $itemsListe")
+                                } catch (e: InterruptedException) {
+                                    e.printStackTrace()
+                                }
+                            }.start()
+                            Log.e(TAG, "ITEMS 2: $itemsListe")
+
+                        } else {
+                            Log.e(TAG, "Get Offers : Erreur - $status")
+                        }
+                    }
+                } catch (e: Exception) {
+                    Log.e(TAG,"Erreur lors de la lecture de la réponse XML", e)
+                }
+            },
+            { error ->
+                Log.d(TAG,"Get offers error")
+                error.printStackTrace()
+            })
+
+        MotherlandApplication.instance.requestQueue?.add(stringRequest)
     }
 
 }
