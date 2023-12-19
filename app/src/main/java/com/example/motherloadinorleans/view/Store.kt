@@ -60,6 +60,10 @@ import java.util.Locale
 fun StoreScreen(storeViewModel: StoreRepo) {
     val offers = storeViewModel.offers.observeAsState(listOf())
 
+    if (offers.value.isEmpty()) {
+        Text(text = "Aucune offre disponible")
+    }
+
     LazyColumn {
         items(offers.value) { offer ->
             OfferItem(offer = offer, storeViewModel = storeViewModel)
@@ -90,10 +94,14 @@ fun OfferItem(offer: Offer, storeViewModel: StoreRepo) {
         else -> Color.White
     }
     val imageUrl = "https://test.vautard.fr/creuse_imgs/${offer.item?.imageUrl}"
+
     val imageModifier = Modifier
         .size(60.dp)
         .clip(RoundedCornerShape(8.dp))
-    Card(backgroundColor = backgroundColor,modifier = Modifier.fillMaxWidth().padding(8.dp)) {
+
+    Card(backgroundColor = backgroundColor,modifier = Modifier
+        .fillMaxWidth()
+        .padding(8.dp)) {
         Row(modifier = Modifier.padding(16.dp)) {
             Image(
                 painter = rememberImagePainter(
@@ -107,7 +115,9 @@ fun OfferItem(offer: Offer, storeViewModel: StoreRepo) {
                 modifier = imageModifier
             )
 
-            Column(modifier = Modifier.padding(start = 8.dp).weight(1f)) {
+            Column(modifier = Modifier
+                .padding(start = 8.dp)
+                .weight(1f)) {
                 Text(text = "Nom: ${offer.item?.name}")
                 Text(text = "Quantité: ${offer.quantity}")
                 Text(text = "Prix: ${offer.price}")
@@ -145,9 +155,12 @@ fun ItemDetailsDialog(offer: Offer, onDismiss: () -> Unit) {
     val imageUrl = "https://test.vautard.fr/creuse_imgs/${offer.item?.imageUrl}"
     val isFrench = Locale.getDefault().language == Locale.FRENCH.language
     val description = if (isFrench) offer.item?.descFr else offer.item?.descEn
+    val type = if (offer.item?.type == "M") "Minerai" else if (offer.item?.type == "A") "Artefact" else "Inconnu"
 
     Dialog(onDismissRequest = onDismiss) {
-        Card(modifier = Modifier.fillMaxWidth().border(1.dp, Color.Black)) {
+        Card(modifier = Modifier
+            .fillMaxWidth()
+            .border(1.dp, Color.Black)) {
             Column(modifier = Modifier.padding(16.dp)) {
                 Text("Détails de l'item", style = MaterialTheme.typography.h6)
                 Spacer(Modifier.height(8.dp))
@@ -158,7 +171,7 @@ fun ItemDetailsDialog(offer: Offer, onDismiss: () -> Unit) {
                 )
                 Spacer(Modifier.height(8.dp))
                 Text("Nom: ${offer.item?.name}")
-                Text("Type: ${offer.item?.type}")
+                Text("Type: $type")
                 Text("Rareté: ${offer.item?.rarity}")
                 Text("Description: $description")
                 Button(onClick = onDismiss, modifier = Modifier.align(Alignment.CenterHorizontally)) {
