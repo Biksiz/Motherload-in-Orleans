@@ -61,7 +61,7 @@ fun navigatePage() {
             composable("settings_page", content = { Settings(navController = navController) })
             composable("change_name_page", content = { ChangeName(navController = navController) })
             composable("store_page", content = { Store(navController = navController, storeRepo = StoreRepo.instance) })
-            composable("sale_page", content = { Sale(navController = navController) })
+            composable("sale_page", content = { Sale(navController = navController, storeRepo = StoreRepo.instance) })
         }
     )
 }

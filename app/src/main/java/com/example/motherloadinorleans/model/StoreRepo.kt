@@ -29,8 +29,9 @@ class StoreRepo private constructor() {
     private val userRepo = UserRepo.getInstance()
     private val _offers = MutableLiveData<List<Offer>>()
     private val _inventaire = MutableLiveData<List<Item>>()
-    private var _money = 0;
+    private var _money = 0
     val offers: LiveData<List<Offer>> = _offers
+    val inventaire: LiveData<List<Item>> = _inventaire
 
     val sharedPref = MotherlandApplication.instance.getSharedPreferences("MyPrefs", Context.MODE_PRIVATE)
     val session = sharedPref.getString("session", "") ?: ""
@@ -51,6 +52,14 @@ class StoreRepo private constructor() {
                 INSTANCE ?: StoreRepo().also { INSTANCE = it }
             }
         }
+    }
+
+    fun getMoney(): Int {
+        return _money
+    }
+
+    fun getInventaire(): List<Item> {
+        return _inventaire.value ?: listOf()
     }
 
     fun getItem(session: String?, signature: String?, itemId: String?, callback: (Item?) -> Unit) {
@@ -256,8 +265,6 @@ class StoreRepo private constructor() {
                         val status = statusNode.textContent.trim()
                         if (status == "OK") {
                             val moneyNode = doc.getElementsByTagName("MONEY").item(0)
-                            _money = moneyNode.textContent.trim().toInt()
-                            Log.e(TAG, "money : $_money")
 
                             val itemsNode = doc.getElementsByTagName("ITEMS").item(0)
                             val listeitems = itemsNode.childNodes
@@ -283,6 +290,7 @@ class StoreRepo private constructor() {
                                         elem.getElementsByTagName("DESC_EN").item(0)?.textContent
                                     )
                                     itemsListe.add(objet)
+                                    countDownLatch.countDown()
                                 }
                             }
                             else {
@@ -292,6 +300,8 @@ class StoreRepo private constructor() {
                                 try {
                                     countDownLatch.await()
                                     _inventaire.postValue(itemsListe)
+                                    _money = moneyNode.textContent.trim().toInt()
+                                    Log.e(TAG, "money : $_money")
                                     Log.e(TAG, "ITEMS 1: $itemsListe")
                                 } catch (e: InterruptedException) {
                                     e.printStackTrace()

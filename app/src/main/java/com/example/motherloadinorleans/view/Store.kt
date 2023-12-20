@@ -167,7 +167,9 @@ fun ItemDetailsDialog(offer: Offer, onDismiss: () -> Unit) {
                 Image(
                     painter = rememberImagePainter(data = imageUrl),
                     contentDescription = "Item Image",
-                    modifier = Modifier.size(128.dp).align(Alignment.CenterHorizontally)
+                    modifier = Modifier
+                        .size(128.dp)
+                        .align(Alignment.CenterHorizontally)
                 )
                 Spacer(Modifier.height(8.dp))
                 Text("Nom: ${offer.item?.name}")
@@ -186,6 +188,7 @@ fun ItemDetailsDialog(offer: Offer, onDismiss: () -> Unit) {
 fun Store(navController: NavController, storeRepo: StoreRepo) {
     val context = LocalContext.current
     val scaffoldState = rememberScaffoldState()
+    val money = storeRepo.getMoney()
 
     Scaffold (
         topBar = {
@@ -239,6 +242,7 @@ fun Store(navController: NavController, storeRepo: StoreRepo) {
                         Text("Vendre")
                     }
                 }
+                Text(text = "Mon argent: $money")
                 StoreScreen(storeViewModel = storeRepo)
             }
         }
