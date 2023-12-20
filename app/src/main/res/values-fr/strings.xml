@@ -24,4 +24,5 @@
     <string name="no">Non</string>
     <string name="menu_text_welcome">Bienvenue</string>
     <string name="parameters_dialog_error">Reinitialisation échoué</string>
+    <string name="parameters_text_signout">Déconnexion</string>
 </resources>

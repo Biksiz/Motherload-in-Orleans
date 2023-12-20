@@ -30,6 +30,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AccountCircle
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.ExitToApp
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -114,6 +115,38 @@ fun Settings(navController: NavController) {
 
                 Divider(color = Color.Gray, thickness = 1.dp)
 
+                Surface(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .clickable {
+                            navController.navigate("login_page") {
+                                popUpTo("login_page") { inclusive = true }
+                            }
+                            with (sharedPref.edit()) {
+                                putString("username", "")
+                                putString("password", "")
+                                putString("session", "")
+                                putString("signature", "")
+                                putString("name", "")
+                                apply()
+                            }
+                            Toast.makeText(context, "Sign Out Successfully", Toast.LENGTH_LONG).show()
+                           },
+                    color = Color.Transparent,
+                    elevation = 0.dp
+                ) {
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        modifier = Modifier.padding(16.dp)
+                    ) {
+                        Icon(Icons.Filled.ExitToApp, contentDescription = stringResource(id = R.string.parameters_text_signout))
+                        Spacer(modifier = Modifier.width(8.dp))
+                        Text(stringResource(id = R.string.parameters_text_signout), fontWeight = FontWeight.Bold, fontSize = 16.sp)
+                    }
+                }
+
+
+                Divider(color = Color.Gray, thickness = 1.dp)
 
                 Surface(
                     modifier = Modifier

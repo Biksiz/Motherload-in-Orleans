@@ -1,6 +1,7 @@
 package com.example.motherloadinorleans.view
 
 import android.widget.Toast
+import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -43,7 +44,13 @@ fun LoginPage(navController: NavController) {
 
     val passwordVisiblity = remember { mutableStateOf(false) }
 
-    Box(modifier = Modifier.fillMaxSize().background(color = White), contentAlignment = Alignment.Center) {
+    BackHandler {
+        /* rien car on ne veut pas que l'utilisateur puisse revenir en arrière */
+    }
+
+    Box(modifier = Modifier
+        .fillMaxSize()
+        .background(color = White), contentAlignment = Alignment.Center) {
         Column(
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Center,
