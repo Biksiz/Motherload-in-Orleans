@@ -28,10 +28,12 @@ class StoreRepo private constructor() {
     private val BASE_URL = "https://test.vautard.fr/creuse_srv/"
     private val userRepo = UserRepo.getInstance()
     private val _offers = MutableLiveData<List<Offer>>()
-    private val _inventaire = MutableLiveData<List<Item>>()
-    private var _money = 0
+    private val _inventaire = MutableLiveData<ArrayList<Pair<Item, Int>>>()
+    private val _money = MutableLiveData<Int>()
+    val money: LiveData<Int> = _money
     val offers: LiveData<List<Offer>> = _offers
-    val inventaire: LiveData<List<Item>> = _inventaire
+    val inventaire: LiveData<ArrayList<Pair<Item, Int>>> = _inventaire
+
 
     val sharedPref = MotherlandApplication.instance.getSharedPreferences("MyPrefs", Context.MODE_PRIVATE)
     val session = sharedPref.getString("session", "") ?: ""
@@ -55,11 +57,15 @@ class StoreRepo private constructor() {
     }
 
     fun getMoney(): Int {
-        return _money
+        return _money.value ?: 0
     }
 
-    fun getInventaire(): List<Item> {
-        return _inventaire.value ?: listOf()
+    fun setMoney(newMoney: Int) {
+        _money.postValue(newMoney)
+    }
+
+    fun getInventaire(): ArrayList<Pair<Item, Int>> {
+        return _inventaire.value ?: ArrayList()
     }
 
     fun getItem(session: String?, signature: String?, itemId: String?, callback: (Item?) -> Unit) {
@@ -242,8 +248,53 @@ class StoreRepo private constructor() {
         MotherlandApplication.instance.requestQueue?.add(stringRequest)
     }
 
-    fun miseAJourAcheter(offerId: String?) {
+    fun vendreItem(session: String?, signature: String?, itemId: String?, quantity : Int? , prix : Int?, callback: (String) -> Unit){
+        val encodedSession = URLEncoder.encode(session, "UTF-8")
+        val encodedSignature = URLEncoder.encode(signature, "UTF-8")
+        val encodedItemId = URLEncoder.encode(itemId, "UTF-8")
+        val encodedQuantity = URLEncoder.encode(quantity.toString(), "UTF-8")
+        val encodedPrix = URLEncoder.encode(prix.toString(), "UTF-8")
+        val url = BASE_URL+"market_vendre.php?session=$encodedSession&signature=$encodedSignature&item_id=$encodedItemId&quantite=$encodedQuantity&prix=$encodedPrix"
+
+        val stringRequest = StringRequest(
+            Request.Method.GET, url,
+            { response ->
+                try {
+                    val docBF: DocumentBuilderFactory = DocumentBuilderFactory.newInstance()
+                    val docBuilder: DocumentBuilder = docBF.newDocumentBuilder()
+                    val doc: Document = docBuilder.parse(response.byteInputStream())
+
+                    val statusNode = doc.getElementsByTagName("STATUS").item(0)
+                    if (statusNode != null) {
+                        val status = statusNode.textContent.trim()
+                        if (status == "OK") {
+                            Log.d(TAG, "Vente réussi !")
+                            callback("OK")
+                        }else if (status == "KO - NO ITEMS"){
+                            Log.e(TAG, "Vente : Erreur - $status")
+                            callback("KO - NO ITEMS")
+                        }else {
+                            Log.e(TAG, "Vente : Erreur - $status")
+                            callback(status)
+                        }
+                    }
+                } catch (e: Exception) {
+                    Log.e(TAG,"Erreur lors de la lecture de la réponse XML", e)
+                    callback("ERROR")
+                }
+            },
+            { error ->
+                Log.d(TAG,"Vente error")
+                error.printStackTrace()
+                callback("ERROR")
+            })
+
+        MotherlandApplication.instance.requestQueue?.add(stringRequest)
+    }
+
+    fun miseAJourAcheter(session: String?, signature: String?,offerId: String?) {
         val updatedOffers = _offers.value?.filterNot { it.offerId == offerId }
+        getStatutDuJoueur(session, signature)
         _offers.postValue(updatedOffers)
     }
 
@@ -251,7 +302,7 @@ class StoreRepo private constructor() {
         val encodedSession = URLEncoder.encode(session, "UTF-8")
         val encodedSignature = URLEncoder.encode(signature, "UTF-8")
         val url = BASE_URL+"status_joueur.php?session=$encodedSession&signature=$encodedSignature"
-        val itemsListe = ArrayList<Item>()
+        val itemsListe = ArrayList<Pair<Item, Int>>()
         val stringRequest = StringRequest(
             Request.Method.GET, url,
             { response ->
@@ -280,17 +331,25 @@ class StoreRepo private constructor() {
                                 Log.e(TAG, "ItemsListIterable  : $itemListIterable")
                                 itemListIterable.forEach{ item ->
                                     val elem = item as Element
-                                    val objet = Item(
-                                        elem.getElementsByTagName("ITEM_ID").item(0)?.textContent,
-                                        elem.getElementsByTagName("NOM").item(0)?.textContent,
-                                        elem.getElementsByTagName("TYPE").item(0)?.textContent,
-                                        elem.getElementsByTagName("RARETE").item(0)?.textContent?.toInt(),
-                                        elem.getElementsByTagName("IMAGE").item(0)?.textContent,
-                                        elem.getElementsByTagName("DESC_FR").item(0)?.textContent,
-                                        elem.getElementsByTagName("DESC_EN").item(0)?.textContent
-                                    )
-                                    itemsListe.add(objet)
-                                    countDownLatch.countDown()
+                                    val itemId = elem.getElementsByTagName("ITEM_ID").item(0)?.textContent
+                                    val quantity = elem.getElementsByTagName("QUANTITE").item(0)?.textContent?.toInt() ?: 0
+                                    getItem(session, signature, itemId){ item ->
+                                        if(item == null){
+                                            Log.e(TAG, "Erreur lors de la récupération de l'item")
+                                        }else{
+                                            val objet = Item(
+                                                itemId,
+                                                item.name,
+                                                item.type,
+                                                item.rarity,
+                                                item.imageUrl,
+                                                item.descFr,
+                                                item.descEn,
+                                            )
+                                            itemsListe.add(Pair(objet, quantity))
+                                            countDownLatch.countDown()
+                                        }
+                                    }
                                 }
                             }
                             else {
@@ -300,7 +359,7 @@ class StoreRepo private constructor() {
                                 try {
                                     countDownLatch.await()
                                     _inventaire.postValue(itemsListe)
-                                    _money = moneyNode.textContent.trim().toInt()
+                                    setMoney(moneyNode.textContent.trim().toInt())
                                     Log.e(TAG, "money : $_money")
                                     Log.e(TAG, "ITEMS 1: $itemsListe")
                                 } catch (e: InterruptedException) {
@@ -324,5 +383,4 @@ class StoreRepo private constructor() {
 
         MotherlandApplication.instance.requestQueue?.add(stringRequest)
     }
-
 }

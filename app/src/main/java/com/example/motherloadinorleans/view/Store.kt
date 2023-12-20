@@ -131,7 +131,7 @@ fun OfferItem(offer: Offer, storeViewModel: StoreRepo) {
                 StoreRepo.instance.acheterItem(session, signature, offer.offerId ?: "") { success ->
                     if (success == "OK") {
                         Toast.makeText(context, "Achat réussi !", Toast.LENGTH_SHORT).show()
-                        StoreRepo.instance.miseAJourAcheter(offer.offerId ?: "")
+                        StoreRepo.instance.miseAJourAcheter(session,signature ,offer.offerId ?: "")
                     }
                     else if (success == "KO - NO MONEY") {
                         Toast.makeText(context, "Pas assez de solde !", Toast.LENGTH_SHORT).show()
@@ -186,9 +186,9 @@ fun ItemDetailsDialog(offer: Offer, onDismiss: () -> Unit) {
 
 @Composable
 fun Store(navController: NavController, storeRepo: StoreRepo) {
+    val money = storeRepo.money.observeAsState(0)
     val context = LocalContext.current
     val scaffoldState = rememberScaffoldState()
-    val money = storeRepo.getMoney()
 
     Scaffold (
         topBar = {
@@ -228,7 +228,7 @@ fun Store(navController: NavController, storeRepo: StoreRepo) {
                         Text("Acheter")
                     }
 
-                    Spacer(modifier= Modifier.width(1.dp)) // Espace optionnel entre les boutons
+                    Spacer(modifier= Modifier.width(1.dp))
 
                     Button(
                         onClick = {
@@ -242,7 +242,7 @@ fun Store(navController: NavController, storeRepo: StoreRepo) {
                         Text("Vendre")
                     }
                 }
-                Text(text = "Mon argent: $money")
+                Text(text = "Mon argent: ${money.value}")
                 StoreScreen(storeViewModel = storeRepo)
             }
         }

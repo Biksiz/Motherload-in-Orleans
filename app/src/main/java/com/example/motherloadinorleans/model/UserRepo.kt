@@ -14,10 +14,10 @@ import org.w3c.dom.Node
 import java.security.MessageDigest
 
 
+
 class UserRepo  private constructor() {
     private val TAG = "UserRepo"
     private val BASE_URL = "https://test.vautard.fr/creuse_srv/"
-
 
 
     companion object {
@@ -98,6 +98,9 @@ class UserRepo  private constructor() {
                                         apply()
                                     }
                                     callback(true)
+                                    val storeRepo = StoreRepo.getInstance()
+                                    storeRepo.recupererOffres(session, signature)
+                                    storeRepo.getStatutDuJoueur(session, signature)
                                 }
                             } else {
                                 Log.e(TAG, "Noeud 'PARAMS' introuvable dans la réponse XML")

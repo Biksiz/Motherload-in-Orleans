@@ -4,6 +4,7 @@ import android.content.Context
 import android.widget.Toast
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -18,12 +19,14 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.Button
 import androidx.compose.material.ButtonDefaults
 import androidx.compose.material.Card
 import androidx.compose.material.Icon
 import androidx.compose.material.IconButton
 import androidx.compose.material.MaterialTheme
+import androidx.compose.material.OutlinedTextField
 import androidx.compose.material.Scaffold
 import androidx.compose.material.Text
 import androidx.compose.material.TopAppBar
@@ -43,6 +46,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
@@ -61,20 +65,22 @@ fun SaleScreen(storeViewModel: StoreRepo) {
 
     if (inventaire.value.isEmpty()) {
         Text(text = "Aucune item disponible")
-    }
-
-    LazyColumn {
-        items(inventaire.value) { item ->
-            Item(item = item, storeViewModel = storeViewModel)
+    }else{
+        LazyColumn {
+            items(inventaire.value) { pair ->
+                    val (item, quantity) = pair
+                    Item(item = item, quantity = quantity, storeViewModel = storeViewModel)
+            }
         }
     }
 }
 
 
-
 @Composable
-fun Item(item: Item, storeViewModel: StoreRepo) {
+fun Item(item: Item, quantity : Int?, storeViewModel: StoreRepo) {
     val context = LocalContext.current
+    val quantityToSellState = remember { mutableStateOf("") }
+    val priceState = remember { mutableStateOf("") }
 
     val sharedPref = context.getSharedPreferences("MyPrefs", Context.MODE_PRIVATE)
     val session = sharedPref.getString("session", "") ?: ""
@@ -102,36 +108,80 @@ fun Item(item: Item, storeViewModel: StoreRepo) {
     Card(backgroundColor = backgroundColor,modifier = Modifier
         .fillMaxWidth()
         .padding(8.dp)) {
-        Row(modifier = Modifier.padding(16.dp)) {
-            Image(
-                painter = rememberImagePainter(
-                    data = imageUrl,
-                    builder = {
-                        error(R.drawable.error_placeholder)
-                        placeholder(R.drawable.loading_placeholder)
-                    }
-                ),
-                contentDescription = "Item Image",
-                modifier = imageModifier
-            )
+        Column{
+            Row(modifier = Modifier.padding(16.dp)) {
+                Image(
+                    painter = rememberImagePainter(
+                        data = imageUrl,
+                        builder = {
+                            error(R.drawable.error_placeholder)
+                            placeholder(R.drawable.loading_placeholder)
+                        }
+                    ),
+                    contentDescription = "Item Image",
+                    modifier = imageModifier
+                )
 
-            Column(modifier = Modifier
-                .padding(start = 8.dp)
-                .weight(1f)) {
-                Text(text = "Nom: ${item.name}")
-                ////////////////////// pour ajouter les texte filde pour l'argent et la quantité
-            }
+                Column(modifier = Modifier
+                    .padding(start = 8.dp)
+                    .weight(1f)) {
+                    Text(text = "Nom: ${item.name}")
+                    Text(text = "Quantité: ${quantity}")
 
-            IconButton(onClick = { showDetailsDialog.value = true }) {
-                Icon(Icons.Filled.Info, contentDescription = "Info")
-            }
+                }
+                IconButton(onClick = { showDetailsDialog.value = true }) {
+                    Icon(Icons.Filled.Info, contentDescription = "Info")
+                }
 
-            Button(
-                onClick = {
-                    //////////////////// à rajoute vendre item
-                }) {
+                Button(
+                    onClick = {
+                        if (quantityToSellState.value.isEmpty() || priceState.value.isEmpty()) {
+                            Toast.makeText(context, "Veuillez remplir tous les champs", Toast.LENGTH_SHORT).show()
+                        } else {
+                            if (quantityToSellState.value.toInt() > quantity!!) {
+                                Toast.makeText(context, "Vous ne pouvez pas vendre plus que ce que vous avez", Toast.LENGTH_SHORT).show()
+                            } else {
+                                storeViewModel.vendreItem(session, signature, item.itemId ?: "", quantityToSellState.value.toInt(), priceState.value.toInt()) { success ->
+                                    if (success == "OK") {
+                                        Toast.makeText(context, "Vente réussie !", Toast.LENGTH_SHORT).show()
+                                        storeViewModel.getStatutDuJoueur(session, signature)
+                                        storeViewModel.recupererOffres(session, signature)
+                                    }else if(success == "KO - NO ITEMS"){
+                                        Toast.makeText(context, "Vous n'avez rien à vendre !", Toast.LENGTH_SHORT).show()
+                                    }else{
+                                        Toast.makeText(context, "Echec de la vente : $success", Toast.LENGTH_SHORT).show()
+                                    }
+                                }
+                            }
+                        }
+                    }) {
                     Icon(Icons.Filled.KeyboardArrowRight, contentDescription = stringResource(id = R.string.menu_text_store))
                 }
+            }
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 16.dp, vertical = 4.dp),
+                horizontalArrangement = Arrangement.SpaceBetween
+            ) {
+                OutlinedTextField(
+                    value = quantityToSellState.value,
+                    onValueChange = { quantityToSellState.value = it },
+                    label = { Text("Quantité à vendre") },
+                    modifier = Modifier.weight(1f),
+                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
+                )
+
+                Spacer(modifier = Modifier.width(8.dp))
+
+                OutlinedTextField(
+                    value = priceState.value,
+                    onValueChange = { priceState.value = it },
+                    label = { Text("Prix") },
+                    modifier = Modifier.weight(1f),
+                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
+                )
+            }
         }
     }
 }
@@ -140,7 +190,7 @@ fun Item(item: Item, storeViewModel: StoreRepo) {
 fun ItemDetailsDialog(item: Item, onDismiss: () -> Unit) {
     val imageUrl = "https://test.vautard.fr/creuse_imgs/${item.imageUrl}"
     val isFrench = Locale.getDefault().language == Locale.FRENCH.language
-    val description = if (isFrench) item.descFr else item.descEn
+    val description = if (isFrench) item?.descFr else item?.descEn
     val type = if (item.type == "M") "Minerai" else if (item.type == "A") "Artefact" else "Inconnu"
 
     Dialog(onDismissRequest = onDismiss) {
@@ -173,9 +223,9 @@ fun ItemDetailsDialog(item: Item, onDismiss: () -> Unit) {
 
 @Composable
 fun Sale(navController: NavController , storeRepo: StoreRepo) {
+    val money = storeRepo.money.observeAsState(0)
     val context = LocalContext.current
     val scaffoldState = rememberScaffoldState()
-    val money = storeRepo.getMoney()
 
     Scaffold (
         topBar = {
@@ -229,7 +279,7 @@ fun Sale(navController: NavController , storeRepo: StoreRepo) {
                         Text("Vendre")
                     }
                 }
-                Text(text = "Mon argent: $money")
+                Text(text = "Mon argent: ${money.value}")
                 SaleScreen(storeViewModel = storeRepo)
             }
         }

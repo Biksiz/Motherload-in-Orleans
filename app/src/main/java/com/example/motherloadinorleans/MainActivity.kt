@@ -56,12 +56,12 @@ fun navigatePage() {
         navController = navController,
         startDestination = "login_page",
         builder = {
-            composable("login_page", content = { LoginPage(navController = navController) })
             composable("menu_page", content = { Menu(navController = navController) })
             composable("settings_page", content = { Settings(navController = navController) })
             composable("change_name_page", content = { ChangeName(navController = navController) })
             composable("store_page", content = { Store(navController = navController, storeRepo = StoreRepo.instance) })
             composable("sale_page", content = { Sale(navController = navController, storeRepo = StoreRepo.instance) })
+            composable("login_page", content = { LoginPage(navController = navController) })
         }
     )
 }
