@@ -14,6 +14,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import com.example.motherloadinorleans.model.GameRepo
 import com.example.motherloadinorleans.model.StoreRepo
 import com.example.motherloadinorleans.ui.theme.MotherLoadInOrleansComposeTheme
 import com.example.motherloadinorleans.view.ChangeName
@@ -22,6 +23,7 @@ import com.example.motherloadinorleans.view.Menu
 import com.example.motherloadinorleans.view.Settings
 import com.example.motherloadinorleans.view.Store
 import com.example.motherloadinorleans.view.Sale
+import com.example.motherloadinorleans.view.Game
 
 class MainActivity : ComponentActivity() {
 
@@ -62,6 +64,7 @@ fun navigatePage() {
             composable("store_page", content = { Store(navController = navController, storeRepo = StoreRepo.instance) })
             composable("sale_page", content = { Sale(navController = navController, storeRepo = StoreRepo.instance) })
             composable("login_page", content = { LoginPage(navController = navController) })
+            composable("game_page", content = { Game(navController = navController, gameRepo = GameRepo.instance) })
         }
     )
 }

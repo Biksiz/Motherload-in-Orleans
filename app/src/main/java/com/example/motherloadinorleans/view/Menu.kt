@@ -105,7 +105,7 @@ fun Menu(navController: NavController) {
 
                     Button(
                         onClick ={
-                            /*Navigation page*/
+                            navController.navigate("game_page")
                         },
                         modifier = Modifier
                             .fillMaxWidth()
