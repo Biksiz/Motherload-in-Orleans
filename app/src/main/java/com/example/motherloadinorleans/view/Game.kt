@@ -1,6 +1,8 @@
 package com.example.motherloadinorleans.view
 
+import android.app.Activity
 import android.content.Context
+import android.content.pm.PackageManager
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -37,6 +39,10 @@ import androidx.navigation.NavController
 import com.example.motherloadinorleans.R
 import com.example.motherloadinorleans.model.GameRepo
 import android.location.Location
+import android.location.LocationListener
+import android.location.LocationManager
+import android.os.Handler
+import android.os.Looper
 import android.widget.Toast
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.size
@@ -48,6 +54,8 @@ import androidx.compose.material.icons.filled.KeyboardArrowRight
 import androidx.compose.material.icons.filled.KeyboardArrowUp
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.core.app.ActivityCompat
+import androidx.core.content.ContextCompat
 import kotlinx.coroutines.delay
 import kotlin.math.*
 
@@ -80,6 +88,8 @@ fun determinerDirection(lat1: Double, lon1: Double, lat2: Double, lon2: Double):
     }
 }
 
+private const val LOCATION_PERMISSION_REQUEST_CODE = 100
+
 @Composable
 fun Game( navController: NavController, gameRepo: GameRepo) {
 
@@ -100,6 +110,37 @@ fun Game( navController: NavController, gameRepo: GameRepo) {
 
     val isButtonEnabled = remember { mutableStateOf(true) }
     val startTimer = remember { mutableStateOf(false) }
+
+    val currentPosition = remember { mutableStateOf(Pair(0.0f, 0.0f)) }
+
+    LaunchedEffect(Unit) {
+        if (ContextCompat.checkSelfPermission( // Vérification de la permission pour la localisation
+                context,
+                android.Manifest.permission.ACCESS_FINE_LOCATION
+            ) == PackageManager.PERMISSION_GRANTED
+        ) {
+            val locationManager = context.getSystemService(Context.LOCATION_SERVICE) as LocationManager
+            val locationListener = LocationListener { location ->
+                currentPosition.value = Pair(location.latitude.toFloat(), location.longitude.toFloat())
+            }
+            locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0L, 0f, locationListener)
+
+            val handler = Handler(Looper.getMainLooper())
+            val runnable = object : Runnable {
+                override fun run() {
+                    gameRepo.deplacement(session, signature, currentPosition.value.second, currentPosition.value.first) { }
+                    handler.postDelayed(this, 10000)
+                }
+            }
+            handler.post(runnable)
+        } else {
+            ActivityCompat.requestPermissions( // Demande de permission pour la localisation si ce n'est pas déjà fait
+                (context as Activity),
+                arrayOf(android.Manifest.permission.ACCESS_FINE_LOCATION),
+                LOCATION_PERMISSION_REQUEST_CODE
+            )
+        }
+    }
 
     LaunchedEffect(startTimer.value) {
         if (startTimer.value) {
@@ -197,6 +238,12 @@ fun Game( navController: NavController, gameRepo: GameRepo) {
                                     Toast.makeText(
                                         context,
                                         "Votre pioche est trop faible !",
+                                        Toast.LENGTH_SHORT
+                                    ).show()
+                                } else if (success == "KO - OUT OF BOUNDS") {
+                                    Toast.makeText(
+                                        context,
+                                        "Revenez sur le campus pour creuser !",
                                         Toast.LENGTH_SHORT
                                     ).show()
                                 } else {

@@ -82,6 +82,7 @@ class GameRepo private constructor(){
                         val status = statusNode.textContent.trim()
                         if (status == "OK") {
                             Log.d(TAG, "Déplacement réussi !")
+                            Log.d(TAG, "Latitude : $lat, Longitude : $lon")
                             val voisinNode = doc.getElementsByTagName("VOISINS").item(0)
                             val listeVoisin = voisinNode.childNodes
                             val voisinListIterable = (0 until listeVoisin.length ).map { listeVoisin.item(it)}
