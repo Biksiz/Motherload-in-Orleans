@@ -3,6 +3,10 @@ package com.example.motherloadinorleans.view
 import android.app.Activity
 import android.content.Context
 import android.content.pm.PackageManager
+import android.hardware.Sensor
+import android.hardware.SensorEvent
+import android.hardware.SensorEventListener
+import android.hardware.SensorManager
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -52,6 +56,7 @@ import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material.icons.filled.KeyboardArrowLeft
 import androidx.compose.material.icons.filled.KeyboardArrowRight
 import androidx.compose.material.icons.filled.KeyboardArrowUp
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.core.app.ActivityCompat
@@ -71,19 +76,22 @@ fun calculateDistance(lat1: Double, lon1: Double, lat2: Double, lon2: Double): F
     return startPoint.distanceTo(endPoint) // La distance est en mètres
 }
 
-fun determinerDirection(lat1: Double, lon1: Double, lat2: Double, lon2: Double): Pair<ImageVector, String> {
+fun determinerDirection(lat1: Double, lon1: Double, lat2: Double, lon2: Double, azimuth: Float): Pair<ImageVector, String> {
     val dLon = Math.toRadians(lon2 - lon1)
 
     val y = sin(dLon) * cos(Math.toRadians(lat2))
     val x = cos(Math.toRadians(lat1)) * sin(Math.toRadians(lat2)) - sin(Math.toRadians(lat1)) * cos(Math.toRadians(lat2)) * cos(dLon)
-    val bearing = atan2(y, x)
+    val bearing = (atan2(y, x) + 2 * Math.PI) % (2 * Math.PI)
 
-    val direction = (Math.toDegrees(bearing) + 360) % 360 // La direction est en degrés
+    val azimuthInRadians = Math.toRadians(azimuth.toDouble())
+    val adjustedBearing = (bearing - azimuthInRadians + 2 * Math.PI) % (2 * Math.PI)
+
+    val adjustedDirection = Math.toDegrees(adjustedBearing)
 
     return when {
-        direction in 45.0..135.0 -> Pair(Icons.Filled.KeyboardArrowRight, "E")
-        direction in 135.0..225.0 -> Pair(Icons.Filled.KeyboardArrowDown, "S")
-        direction in 225.0..315.0 -> Pair(Icons.Filled.KeyboardArrowLeft, "O")
+        adjustedDirection in 45.0..135.0 -> Pair(Icons.Filled.KeyboardArrowRight, "E")
+        adjustedDirection in 135.0..225.0 -> Pair(Icons.Filled.KeyboardArrowDown, "S")
+        adjustedDirection in 225.0..315.0 -> Pair(Icons.Filled.KeyboardArrowLeft, "O")
         else -> Pair(Icons.Filled.KeyboardArrowUp, "N")
     }
 }
@@ -112,6 +120,40 @@ fun Game( navController: NavController, gameRepo: GameRepo) {
     val startTimer = remember { mutableStateOf(false) }
 
     val currentPosition = remember { mutableStateOf(Pair(0.0f, 0.0f)) }
+
+    val sensorManager = context.getSystemService(Context.SENSOR_SERVICE) as SensorManager
+    val accelerometer = sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER)
+    val magnetometer = sensorManager.getDefaultSensor(Sensor.TYPE_MAGNETIC_FIELD)
+
+    val lastAccelerometer = remember { FloatArray(3) }
+    val lastMagnetometer = remember { FloatArray(3) }
+    val rotationMatrix = remember { FloatArray(9) }
+    val orientation = remember { FloatArray(3) }
+    val azimuth = remember { mutableStateOf(0f) }
+
+    DisposableEffect(Unit) {
+        val sensorEventListener = object : SensorEventListener {
+            override fun onSensorChanged(event: SensorEvent) {
+                if (event.sensor.type == Sensor.TYPE_ACCELEROMETER) {
+                    System.arraycopy(event.values, 0, lastAccelerometer, 0, event.values.size)
+                } else if (event.sensor.type == Sensor.TYPE_MAGNETIC_FIELD) {
+                    System.arraycopy(event.values, 0, lastMagnetometer, 0, event.values.size)
+                }
+                SensorManager.getRotationMatrix(rotationMatrix, null, lastAccelerometer, lastMagnetometer)
+                SensorManager.getOrientation(rotationMatrix, orientation)
+                azimuth.value = Math.toDegrees(orientation[0].toDouble()).toFloat()
+            }
+
+            override fun onAccuracyChanged(sensor: Sensor, accuracy: Int) {}
+        }
+
+        sensorManager.registerListener(sensorEventListener, accelerometer, SensorManager.SENSOR_DELAY_GAME)
+        sensorManager.registerListener(sensorEventListener, magnetometer, SensorManager.SENSOR_DELAY_GAME)
+
+        onDispose {
+            sensorManager.unregisterListener(sensorEventListener)
+        }
+    }
 
     LaunchedEffect(Unit) {
         if (ContextCompat.checkSelfPermission( // Vérification de la permission pour la localisation
@@ -199,7 +241,8 @@ fun Game( navController: NavController, gameRepo: GameRepo) {
                     fontWeight = FontWeight.Bold,
                     color = Color.Black,
                 )
-                Spacer(modifier = Modifier.padding(16.dp))
+                Spacer(modifier = Modifier.padding(8.dp))
+
                 Text(
                     text = "Lat: $latitude",
                     fontSize = 25.sp,
@@ -212,7 +255,8 @@ fun Game( navController: NavController, gameRepo: GameRepo) {
                     fontWeight = FontWeight.Bold,
                     color = Color.Black,
                 )
-                Spacer(modifier = Modifier.padding(16.dp))
+
+                Spacer(modifier = Modifier.padding(8.dp))
 
                 Button(
                     onClick =
@@ -290,14 +334,14 @@ fun Game( navController: NavController, gameRepo: GameRepo) {
                             val cinqPremiersVoisins = voisins
                                 .filter { voisin -> voisin.name != name }
                                 .sortedBy { voisin ->
-                                    calculateDistance(latitude!!.toDouble(), longitude!!.toDouble(), voisin.position.first!!.toDouble(), voisin.position.second!!.toDouble())
+                                    calculateDistance(longitude!!.toDouble(), latitude!!.toDouble(), voisin.position.first!!.toDouble(), voisin.position.second!!.toDouble())
                                 }
                             .take(5)
 
                             items( cinqPremiersVoisins.size ){ index  ->
                                 val voisin = cinqPremiersVoisins[index]
-                                val distance = calculateDistance(latitude!!.toDouble(), longitude!!.toDouble(), voisin.position.first!!.toDouble(), voisin.position.second!!.toDouble())
-                                val (directionIcon, directionLabel) = determinerDirection(latitude!!.toDouble(), longitude!!.toDouble(), voisin.position.first!!.toDouble(), voisin.position.second!!.toDouble())
+                                val distance = calculateDistance(longitude!!.toDouble(), latitude!!.toDouble(), voisin.position.first!!.toDouble(), voisin.position.second!!.toDouble())
+                                val (directionIcon, directionLabel) = determinerDirection(latitude!!.toDouble(), longitude!!.toDouble(), voisin.position.first!!.toDouble(), voisin.position.second!!.toDouble(), azimuth.value)
 
                                 Row {
                                     Column {

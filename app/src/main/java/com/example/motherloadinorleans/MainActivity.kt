@@ -79,7 +79,7 @@ class MainActivity : ComponentActivity(), CoroutineScope by MainScope() {
 
     override fun onDestroy() {
         super.onDestroy()
-        cancel() // Annuler toutes les coroutines lors de la destruction
+        cancel()
     }
 }
 
@@ -87,16 +87,6 @@ class MainActivity : ComponentActivity(), CoroutineScope by MainScope() {
 fun navigatePage() {
     val navController = rememberNavController()
 
-    val userRepo = UserRepo.getInstance()
-    /*
-    if (userRepo.reconnexionFailed.value == true) {
-        LaunchedEffect(Unit) {
-            navController.navigate("login_page") {
-                popUpTo("login_page") { inclusive = true }
-            }
-        }
-    }
-    */
     NavHost(
         navController = navController,
         startDestination = "login_page",

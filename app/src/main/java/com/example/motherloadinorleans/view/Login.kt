@@ -63,7 +63,8 @@ fun LoginPage(navController: NavController) {
                 Image(
                     modifier = Modifier
                         .width(400.dp)
-                        .height(200.dp),
+                        .height(200.dp)
+                        .padding(10.dp),
                     painter = painterResource(R.drawable.logo),
                     contentDescription = "Login Image",
                     contentScale = ContentScale.Fit,

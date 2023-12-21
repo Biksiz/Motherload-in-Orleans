@@ -29,6 +29,7 @@ import androidx.compose.material.MaterialTheme
 import androidx.compose.material.OutlinedTextField
 import androidx.compose.material.Scaffold
 import androidx.compose.material.Text
+import androidx.compose.material.TextFieldDefaults
 import androidx.compose.material.TopAppBar
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
@@ -91,14 +92,25 @@ fun Item(item: Item, quantity : Int?, storeViewModel: StoreRepo) {
     if (showDetailsDialog.value) {
         ItemDetailsDialog(item = item, onDismiss = { showDetailsDialog.value = false })
     }
+
     val backgroundColor = when (item.rarity) {
         1 -> Color.Gray
-        2 -> Color.Green
-        3 -> Color.Blue
-        4 -> Color.Magenta
-        5 -> Color.Yellow
+        2 -> Color(0xFF33E251)
+        3 -> Color(0xFF258DCC)
+        4 -> Color(0xFFA955CE)
+        5 -> Color(0xFFEDBB12)
         else -> Color.White
     }
+
+    val textColor = when (item.rarity) {
+        1 -> Color.Black
+        2 -> Color.Black
+        3 -> Color.White
+        4 -> Color.White
+        5 -> Color.Black
+        else -> Color.Black
+    }
+
     val imageUrl = "https://test.vautard.fr/creuse_imgs/${item.imageUrl}"
 
     val imageModifier = Modifier
@@ -109,7 +121,7 @@ fun Item(item: Item, quantity : Int?, storeViewModel: StoreRepo) {
         .fillMaxWidth()
         .padding(8.dp)) {
         Column{
-            Row(modifier = Modifier.padding(16.dp)) {
+            Row(modifier = Modifier.padding(start = 16.dp, top = 16.dp, end = 16.dp, bottom = 0.dp)) {
                 Image(
                     painter = rememberImagePainter(
                         data = imageUrl,
@@ -125,12 +137,12 @@ fun Item(item: Item, quantity : Int?, storeViewModel: StoreRepo) {
                 Column(modifier = Modifier
                     .padding(start = 8.dp)
                     .weight(1f)) {
-                    Text(text = "Nom: ${item.name}")
-                    Text(text = "Quantité: ${quantity}")
+                    Text(text = "Nom: ${item.name}", color = textColor)
+                    Text(text = "Quantité: ${quantity}", color = textColor)
 
                 }
                 IconButton(onClick = { showDetailsDialog.value = true }) {
-                    Icon(Icons.Filled.Info, contentDescription = "Info")
+                    Icon(Icons.Filled.Info, contentDescription = "Info", tint = textColor)
                 }
 
                 Button(
@@ -161,15 +173,22 @@ fun Item(item: Item, quantity : Int?, storeViewModel: StoreRepo) {
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(horizontal = 16.dp, vertical = 4.dp),
+                    .padding(start = 16.dp, top = 6.dp, end = 16.dp, bottom = 16.dp),
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
                 OutlinedTextField(
                     value = quantityToSellState.value,
                     onValueChange = { quantityToSellState.value = it },
-                    label = { Text("Quantité à vendre") },
+                    label = { Text("Quantité à vendre", color = textColor) },
                     modifier = Modifier.weight(1f),
-                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
+                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                    colors = TextFieldDefaults.outlinedTextFieldColors(
+                        focusedBorderColor = textColor,
+                        unfocusedBorderColor = textColor,
+                        textColor = textColor,
+                        focusedLabelColor = textColor,
+                        unfocusedLabelColor = textColor
+                    )
                 )
 
                 Spacer(modifier = Modifier.width(8.dp))
@@ -177,9 +196,16 @@ fun Item(item: Item, quantity : Int?, storeViewModel: StoreRepo) {
                 OutlinedTextField(
                     value = priceState.value,
                     onValueChange = { priceState.value = it },
-                    label = { Text("Prix") },
+                    label = { Text("Prix", color = textColor) },
                     modifier = Modifier.weight(1f),
-                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
+                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                    colors = TextFieldDefaults.outlinedTextFieldColors(
+                        focusedBorderColor = textColor,
+                        unfocusedBorderColor = textColor,
+                        textColor = textColor,
+                        focusedLabelColor = textColor,
+                        unfocusedLabelColor = textColor
+                    )
                 )
             }
         }
@@ -279,7 +305,8 @@ fun Sale(navController: NavController , storeRepo: StoreRepo) {
                         Text("Vendre")
                     }
                 }
-                Text(text = "Mon argent: ${money.value}")
+                Text(text = "Mon solde: ${money.value} €")
+                Spacer(modifier = Modifier.height(8.dp))
                 SaleScreen(storeViewModel = storeRepo)
             }
         }

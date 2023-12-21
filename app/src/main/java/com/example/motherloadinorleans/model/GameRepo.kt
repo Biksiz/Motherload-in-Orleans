@@ -261,13 +261,14 @@ class GameRepo private constructor(){
                                         Log.d(TAG, "Déplacement réussi !")
                                     }else if (status == "KO - BAD LOCATION FORMAT"){
                                         Log.e(TAG, "Déplacement : Erreur - $status")
+                                        Log.e(TAG, "Latitude : $lat, Longitude : $lon")
                                     }else {
                                         Log.e(TAG, "Déplacement : Erreur - $status")
                                     }
                                 })
                             }
                         } else {
-                            Log.e(TAG, "Get Offers : Erreur - $status")
+                            Log.e(TAG, "Get Status : Erreur - $status")
                         }
                     }
                 } catch (e: Exception) {

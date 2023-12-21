@@ -87,12 +87,22 @@ fun OfferItem(offer: Offer, storeViewModel: StoreRepo) {
 
     val backgroundColor = when (offer.item?.rarity) {
         1 -> Color.Gray
-        2 -> Color.Green
-        3 -> Color.Blue
-        4 -> Color.Magenta
-        5 -> Color.Yellow
+        2 -> Color(0xFF33E251)
+        3 -> Color(0xFF258DCC)
+        4 -> Color(0xFFA955CE)
+        5 -> Color(0xFFEDBB12)
         else -> Color.White
     }
+
+    val textColor = when (offer.item?.rarity) {
+        1 -> Color.Black
+        2 -> Color.Black
+        3 -> Color.White
+        4 -> Color.White
+        5 -> Color.Black
+        else -> Color.Black
+    }
+
     val imageUrl = "https://test.vautard.fr/creuse_imgs/${offer.item?.imageUrl}"
 
     val imageModifier = Modifier
@@ -118,13 +128,13 @@ fun OfferItem(offer: Offer, storeViewModel: StoreRepo) {
             Column(modifier = Modifier
                 .padding(start = 8.dp)
                 .weight(1f)) {
-                Text(text = "Nom: ${offer.item?.name}")
-                Text(text = "Quantité: ${offer.quantity}")
-                Text(text = "Prix: ${offer.price}")
+                Text(text = "Nom: ${offer.item?.name}", color = textColor)
+                Text(text = "Quantité: ${offer.quantity}", color = textColor)
+                Text(text = "Prix: ${offer.price} €", color = textColor)
             }
 
             IconButton(onClick = { showDetailsDialog.value = true }) {
-                Icon(Icons.Filled.Info, contentDescription = "Info")
+                Icon(Icons.Filled.Info, contentDescription = "Info", tint = textColor)
             }
 
             Button(onClick = {
@@ -242,7 +252,8 @@ fun Store(navController: NavController, storeRepo: StoreRepo) {
                         Text("Vendre")
                     }
                 }
-                Text(text = "Mon argent: ${money.value}")
+                Text(text = "Mon solde: ${money.value} €")
+                Spacer(modifier = Modifier.height(8.dp))
                 StoreScreen(storeViewModel = storeRepo)
             }
         }
