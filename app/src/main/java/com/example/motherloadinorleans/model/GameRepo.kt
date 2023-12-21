@@ -14,6 +14,7 @@ import java.util.concurrent.CountDownLatch
 import javax.xml.parsers.DocumentBuilder
 import javax.xml.parsers.DocumentBuilderFactory
 import org.w3c.dom.Element
+import org.xml.sax.InputSource
 
 class GameRepo private constructor(){
     private val TAG = "GameRepo"
@@ -207,9 +208,9 @@ class GameRepo private constructor(){
                         }else if (status == "KO - TOO FAST"){
                             Log.e(TAG, "Creuser : Erreur - $status")
                             callback("KO - TOO FAST")
-                        }else if (status == "KO - BAD PICKAXE"){
+                        }else if (status == "KO  - BAD PICKAXE"){
                             Log.e(TAG, "Creuser : Erreur - $status")
-                            callback("KO - BAD PICKAXE")
+                            callback("KO  - BAD PICKAXE")
                         }else {
                             Log.e(TAG, "Creuser : Erreur - $status")
                             callback(status)
