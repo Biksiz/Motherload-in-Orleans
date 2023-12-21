@@ -2,6 +2,7 @@ package com.example.motherloadinorleans.model
 
 import android.content.Context
 import android.util.Log
+import androidx.lifecycle.MutableLiveData
 import com.android.volley.toolbox.StringRequest
 import java.net.URLEncoder
 import com.android.volley.Request
@@ -19,16 +20,27 @@ class UserRepo  private constructor() {
     private val TAG = "UserRepo"
     private val BASE_URL = "https://test.vautard.fr/creuse_srv/"
 
+    private var _user = User("","","","")
+
+    val reconnexionFailed = MutableLiveData<Boolean>()
 
     companion object {
+
         @Volatile
         private var INSTANCE: UserRepo? = null
-
         fun getInstance(): UserRepo {
             return INSTANCE ?: synchronized(this) {
                 INSTANCE ?: UserRepo().also { INSTANCE = it }
             }
         }
+    }
+
+    fun get_user(): User {
+        return _user
+    }
+
+    fun clear_user() {
+        _user = User("","","","")
     }
 
     fun hashPassword(password: String): String {
@@ -42,12 +54,6 @@ class UserRepo  private constructor() {
 
         return stringBuilder.toString()
     }
-
-    private val _user = User("","","","")
-    /**private val _messages = MutableLiveData<List<Message>>()
-    val messages: LiveData<List<Message>> get() = _messages
-    private val mListe = ArrayList<Message>()
-    private var mAutoIncrement: Int = 0*/
 
     // La méthode d'ajout de message se contente désormais d'appeler le webservice.
     fun connexion(username: String, password: String, callback: (Boolean) -> Unit){
@@ -84,6 +90,7 @@ class UserRepo  private constructor() {
                                     _user.password = password
                                     _user.session = session
                                     _user.signature = signature
+                                    reconnexionFailed.postValue(false)
                                     println("status2 : $status")
                                     println("session : $session")
                                     println("signature : $signature")
@@ -206,5 +213,91 @@ class UserRepo  private constructor() {
         MotherlandApplication.instance.requestQueue?.add(stringRequest)
     }
 
+
+    fun reconnexion(username: String, password: String, callback: (Boolean) -> Unit){
+        val encodedUser = URLEncoder.encode(username, "UTF-8")
+        val encodedPassword =hashPassword(password)
+        val url = BASE_URL+"connexion.php?login=$encodedUser&passwd=$encodedPassword"
+
+        val sharedPref = MotherlandApplication.instance.getSharedPreferences("MyPrefs", Context.MODE_PRIVATE)
+        with (sharedPref.edit()) {
+            putString("username", "")
+            putString("password", "")
+            putString("session", "")
+            putString("signature", "")
+            putString("name", "")
+            apply()
+        }
+        clear_user()
+
+        val stringRequest = StringRequest(
+            Request.Method.GET, url,
+            { response ->
+                try {
+                    val docBF: DocumentBuilderFactory = DocumentBuilderFactory.newInstance()
+                    val docBuilder: DocumentBuilder = docBF.newDocumentBuilder()
+                    val doc: Document = docBuilder.parse(response.byteInputStream())
+
+                    val statusNode = doc.getElementsByTagName("STATUS").item(0)
+                    if (statusNode != null) {
+                        val status = statusNode.textContent.trim()
+
+                        if (status == "OK") {
+                            val paramsNode = doc.getElementsByTagName("PARAMS").item(0)
+                            if (paramsNode != null && paramsNode.nodeType == Node.ELEMENT_NODE) {
+                                val elem = paramsNode as Element
+                                val session = elem.getElementsByTagName("SESSION").item(0)?.textContent
+                                val signature = elem.getElementsByTagName("SIGNATURE").item(0)?.textContent
+
+                                if (!session.isNullOrEmpty() && !signature.isNullOrEmpty()) {
+                                    _user.username = username
+                                    _user.password = password
+                                    _user.session = session
+                                    _user.signature = signature
+                                    reconnexionFailed.postValue(false)
+                                    println("status2 : $status")
+                                    println("session : $session")
+                                    println("signature : $signature")
+                                    with (sharedPref.edit()) {
+                                        putString("username", username)
+                                        putString("password", password)
+                                        putString("session", session)
+                                        putString("signature", signature)
+                                        putString("name", username)
+                                        apply()
+                                    }
+                                    callback(true)
+                                    Log.e(TAG, "Reconnexion réussie !")
+                                }
+                                else {
+                                    Log.e(TAG, "Noeud 'PARAMS' introuvable dans la réponse XML")
+                                    reconnexionFailed.postValue(true)
+                                    callback(false)
+                                }
+                            } else {
+                                Log.e(TAG, "Noeud 'PARAMS' introuvable dans la réponse XML")
+                                reconnexionFailed.postValue(true)
+                                callback(false)
+                            }
+                        } else {
+                            Log.e(TAG, "Reconnexion : Erreur - $status")
+                            reconnexionFailed.postValue(true)
+                            callback(false)
+                        }
+                    }
+                } catch (e: Exception) {
+                    Log.e(TAG,"Erreur lors de la lecture de la réponse XML", e)
+                    reconnexionFailed.postValue(true)
+                    callback(false)
+                }
+            },
+            { error ->
+                Log.d(TAG,"Reconnexion : Erreur")
+                error.printStackTrace()
+                callback(false)
+            })
+
+        MotherlandApplication.instance.requestQueue?.add(stringRequest)
+    }
 
 }

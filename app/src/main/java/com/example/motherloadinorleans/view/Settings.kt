@@ -130,6 +130,8 @@ fun Settings(navController: NavController) {
                                 putString("name", "")
                                 apply()
                             }
+                            repository.clear_user()
+                            repository.reconnexionFailed.postValue(true)
                             Toast.makeText(context, "Sign Out Successfully", Toast.LENGTH_LONG).show()
                            },
                     color = Color.Transparent,
