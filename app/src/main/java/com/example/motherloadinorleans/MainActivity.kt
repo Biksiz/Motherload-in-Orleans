@@ -22,7 +22,9 @@ import androidx.navigation.compose.rememberNavController
 import com.example.motherloadinorleans.model.GameRepo
 import com.example.motherloadinorleans.model.StoreRepo
 import com.example.motherloadinorleans.model.UserRepo
+import com.example.motherloadinorleans.model.WorkshopRepo
 import com.example.motherloadinorleans.ui.theme.MotherLoadInOrleansComposeTheme
+import com.example.motherloadinorleans.view.Album
 import com.example.motherloadinorleans.view.ChangeName
 import com.example.motherloadinorleans.view.LoginPage
 import com.example.motherloadinorleans.view.Menu
@@ -98,6 +100,7 @@ fun navigatePage() {
             composable("sale_page", content = { Sale(navController = navController, storeRepo = StoreRepo.instance) })
             composable("login_page", content = { LoginPage(navController = navController) })
             composable("game_page", content = { Game(navController = navController, gameRepo = GameRepo.instance) })
+            composable("album_page", content = { Album(navController = navController, workshopRepo = WorkshopRepo.instance) })
         }
     )
 }
