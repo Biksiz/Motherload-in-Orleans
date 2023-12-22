@@ -64,6 +64,11 @@ fun Settings(navController: NavController) {
     val session = sharedPref.getString("session", "") ?: ""
     val signature = sharedPref.getString("signature", "") ?: ""
 
+    val signOutMessage = stringResource(id = R.string.parameters_msg_signout)
+
+    val parameters_msg_reinitialize_success = stringResource(id = R.string.parameters_msg_reinitialize_success)
+    val parameters_msg_reinitialize_error = stringResource(id = R.string.parameters_msg_reinitialize_error)
+
     Scaffold(
         topBar = {
             TopAppBar(
@@ -132,7 +137,7 @@ fun Settings(navController: NavController) {
                             }
                             repository.clear_user()
                             repository.reconnexionFailed.postValue(true)
-                            Toast.makeText(context, "Sign Out Successfully", Toast.LENGTH_LONG).show()
+                            Toast.makeText(context, signOutMessage, Toast.LENGTH_LONG).show()
                            },
                     color = Color.Transparent,
                     elevation = 0.dp
@@ -192,7 +197,7 @@ fun Settings(navController: NavController) {
                                                         showDialog = false
                                                         Toast.makeText(
                                                             context,
-                                                            "Reinitialization successful",
+                                                            parameters_msg_reinitialize_success,
                                                             Toast.LENGTH_LONG
                                                         ).show()
                                                         navController.navigate("login_page") {
@@ -202,7 +207,7 @@ fun Settings(navController: NavController) {
                                                         showDialog = false
                                                         Toast.makeText(
                                                             context,
-                                                            "Reinitialization failed",
+                                                            parameters_msg_reinitialize_error,
                                                             Toast.LENGTH_LONG
                                                         ).show()
                                                     }

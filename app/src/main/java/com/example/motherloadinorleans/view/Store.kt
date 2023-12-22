@@ -61,7 +61,7 @@ fun StoreScreen(storeViewModel: StoreRepo) {
     val offers = storeViewModel.offers.observeAsState(listOf())
 
     if (offers.value.isEmpty()) {
-        Text(text = "Aucune offre disponible")
+        Text(text = stringResource(id = R.string.store_text_no_offers))
     }
 
     LazyColumn {
@@ -80,6 +80,16 @@ fun OfferItem(offer: Offer, storeViewModel: StoreRepo) {
     val signature = sharedPref.getString("signature", "") ?: ""
 
     val showDetailsDialog = remember { mutableStateOf(false) }
+
+    val store_text_item_name = stringResource(id = R.string.store_text_item_name)
+    val store_text_item_quantity = stringResource(id = R.string.store_text_item_quantity)
+    val store_text_item_price = stringResource(id = R.string.store_text_item_price)
+    val store_text_item_info = stringResource(id = R.string.store_text_item_info)
+    val store_text_buy_success = stringResource(id = R.string.store_text_buy_success)
+    val store_text_buy_no_money = stringResource(id = R.string.store_text_buy_no_money)
+    val store_text_buy_no_offer = stringResource(id = R.string.store_text_buy_no_offer)
+    val store_text_buy_error = stringResource(id = R.string.store_text_buy_error)
+    val store_text_item_image = stringResource(id = R.string.store_text_item_image)
 
     if (showDetailsDialog.value) {
         ItemDetailsDialog(offer = offer, onDismiss = { showDetailsDialog.value = false })
@@ -121,36 +131,36 @@ fun OfferItem(offer: Offer, storeViewModel: StoreRepo) {
                         placeholder(R.drawable.loading_placeholder)
                     }
                 ),
-                contentDescription = "Item Image",
+                contentDescription = store_text_item_image,
                 modifier = imageModifier
             )
 
             Column(modifier = Modifier
                 .padding(start = 8.dp)
                 .weight(1f)) {
-                Text(text = "Nom: ${offer.item?.name}", color = textColor)
-                Text(text = "Quantité: ${offer.quantity}", color = textColor)
-                Text(text = "Prix: ${offer.price} €", color = textColor)
+                Text(text = "$store_text_item_name: ${offer.item?.name}", color = textColor)
+                Text(text = "$store_text_item_quantity: ${offer.quantity}", color = textColor)
+                Text(text = "$store_text_item_price: ${offer.price} €", color = textColor)
             }
 
             IconButton(onClick = { showDetailsDialog.value = true }) {
-                Icon(Icons.Filled.Info, contentDescription = "Info", tint = textColor)
+                Icon(Icons.Filled.Info, contentDescription = store_text_item_info, tint = textColor)
             }
 
             Button(onClick = {
                 StoreRepo.instance.acheterItem(session, signature, offer.offerId ?: "") { success ->
                     if (success == "OK") {
-                        Toast.makeText(context, "Achat réussi !", Toast.LENGTH_SHORT).show()
+                        Toast.makeText(context, store_text_buy_success, Toast.LENGTH_SHORT).show()
                         StoreRepo.instance.miseAJourAcheter(session,signature ,offer.offerId ?: "")
                     }
                     else if (success == "KO - NO MONEY") {
-                        Toast.makeText(context, "Pas assez de solde !", Toast.LENGTH_SHORT).show()
+                        Toast.makeText(context, store_text_buy_no_money, Toast.LENGTH_SHORT).show()
                     }
                     else if (success == "KO - UNKNOWN ID") {
-                        Toast.makeText(context, "L'offre n'existe plus !", Toast.LENGTH_SHORT).show()
+                        Toast.makeText(context, store_text_buy_no_offer, Toast.LENGTH_SHORT).show()
                     }
                     else {
-                        Toast.makeText(context, "Erreur lors de l'achat !", Toast.LENGTH_SHORT).show()
+                        Toast.makeText(context, store_text_buy_error, Toast.LENGTH_SHORT).show()
                     }
                 }
             }) {
@@ -162,17 +172,27 @@ fun OfferItem(offer: Offer, storeViewModel: StoreRepo) {
 
 @Composable
 fun ItemDetailsDialog(offer: Offer, onDismiss: () -> Unit) {
+    val store_text_minerai = stringResource(id = R.string.store_text_minerai)
+    val store_text_artefact = stringResource(id = R.string.store_text_artefact)
+    val store_text_buy_unknown = stringResource(id = R.string.store_text_buy_unknown)
+    val store_text_item_details = stringResource(id = R.string.store_text_item_details)
+    val store_text_item_name = stringResource(id = R.string.store_text_item_name)
+    val store_text_item_type = stringResource(id = R.string.store_text_item_type)
+    val store_text_item_rarity = stringResource(id = R.string.store_text_item_rarity)
+    val store_text_item_description = stringResource(id = R.string.store_text_item_description)
+    val store_btn_close = stringResource(id = R.string.store_btn_close)
+
     val imageUrl = "https://test.vautard.fr/creuse_imgs/${offer.item?.imageUrl}"
     val isFrench = Locale.getDefault().language == Locale.FRENCH.language
     val description = if (isFrench) offer.item?.descFr else offer.item?.descEn
-    val type = if (offer.item?.type == "M") "Minerai" else if (offer.item?.type == "A") "Artefact" else "Inconnu"
+    val type = if (offer.item?.type == "M") store_text_minerai else if (offer.item?.type == "A") store_text_artefact else store_text_buy_unknown
 
     Dialog(onDismissRequest = onDismiss) {
         Card(modifier = Modifier
             .fillMaxWidth()
             .border(1.dp, Color.Black)) {
             Column(modifier = Modifier.padding(16.dp)) {
-                Text("Détails de l'item", style = MaterialTheme.typography.h6)
+                Text(store_text_item_details, style = MaterialTheme.typography.h6)
                 Spacer(Modifier.height(8.dp))
                 Image(
                     painter = rememberImagePainter(data = imageUrl),
@@ -182,12 +202,12 @@ fun ItemDetailsDialog(offer: Offer, onDismiss: () -> Unit) {
                         .align(Alignment.CenterHorizontally)
                 )
                 Spacer(Modifier.height(8.dp))
-                Text("Nom: ${offer.item?.name}")
-                Text("Type: $type")
-                Text("Rareté: ${offer.item?.rarity}")
-                Text("Description: $description")
+                Text("$store_text_item_name: ${offer.item?.name}")
+                Text("$store_text_item_type: $type")
+                Text("$store_text_item_rarity: ${offer.item?.rarity}")
+                Text("$store_text_item_description: $description")
                 Button(onClick = onDismiss, modifier = Modifier.align(Alignment.CenterHorizontally)) {
-                    Text("FERMER")
+                    Text(store_btn_close)
                 }
             }
         }
@@ -199,6 +219,10 @@ fun Store(navController: NavController, storeRepo: StoreRepo) {
     val money = storeRepo.money.observeAsState(0)
     val context = LocalContext.current
     val scaffoldState = rememberScaffoldState()
+
+    val store_text_buy = stringResource(id = R.string.store_text_buy)
+    val store_text_sell = stringResource(id = R.string.store_text_sell)
+    val store_text_money = stringResource(id = R.string.store_text_money)
 
     Scaffold (
         topBar = {
@@ -235,7 +259,7 @@ fun Store(navController: NavController, storeRepo: StoreRepo) {
                         ),
                         border = BorderStroke(1.dp, Color.Black)
                     ) {
-                        Text("Acheter")
+                        Text(store_text_buy)
                     }
 
                     Spacer(modifier= Modifier.width(1.dp))
@@ -249,10 +273,10 @@ fun Store(navController: NavController, storeRepo: StoreRepo) {
                             contentColor = Color.White
                         )
                     ) {
-                        Text("Vendre")
+                        Text(store_text_sell)
                     }
                 }
-                Text(text = "Mon solde: ${money.value} €")
+                Text(text = "$store_text_money: ${money.value} €")
                 Spacer(modifier = Modifier.height(8.dp))
                 StoreScreen(storeViewModel = storeRepo)
             }

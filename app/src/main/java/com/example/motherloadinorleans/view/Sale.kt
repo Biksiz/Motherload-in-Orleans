@@ -65,7 +65,7 @@ fun SaleScreen(storeViewModel: StoreRepo) {
     val inventaire = storeViewModel.inventaire.observeAsState(listOf())
 
     if (inventaire.value.isEmpty()) {
-        Text(text = "Aucune item disponible")
+        Text(text = stringResource(id = R.string.sale_text_no_items))
     }else{
         LazyColumn {
             items(inventaire.value) { pair ->
@@ -88,6 +88,21 @@ fun Item(item: Item, quantity : Int?, storeViewModel: StoreRepo) {
     val signature = sharedPref.getString("signature", "") ?: ""
 
     val showDetailsDialog = remember { mutableStateOf(false) }
+
+    val store_text_item_name = stringResource(id = R.string.store_text_item_name)
+    val store_text_item_quantity = stringResource(id = R.string.store_text_item_quantity)
+    val store_text_item_price = stringResource(id = R.string.store_text_item_price)
+    val store_text_item_info = stringResource(id = R.string.store_text_item_info)
+    val sell_text_empty_fields = stringResource(id = R.string.sell_text_empty_fields)
+    val sell_text_sell_more_than_quantity = stringResource(id = R.string.sell_text_sell_more_than_quantity)
+    val sell_text_sell_negative_quantity = stringResource(id = R.string.sell_text_sell_negative_quantity)
+    val sell_text_sell_negative_price = stringResource(id = R.string.sell_text_sell_negative_price)
+    val sell_text_sell_success = stringResource(id = R.string.sell_text_sell_success)
+    val sell_text_sell_no_items = stringResource(id = R.string.sell_text_sell_no_items)
+    val sell_text_sell_error = stringResource(id = R.string.sell_text_sell_error)
+    val sell_text_invalid_number = stringResource(id = R.string.sell_text_invalid_number)
+    val store_text_item_image = stringResource(id = R.string.store_text_item_image)
+    val sell_text_quantity_sell = stringResource(id = R.string.sell_text_quantity_sell)
 
     if (showDetailsDialog.value) {
         ItemDetailsDialog(item = item, onDismiss = { showDetailsDialog.value = false })
@@ -130,51 +145,51 @@ fun Item(item: Item, quantity : Int?, storeViewModel: StoreRepo) {
                             placeholder(R.drawable.loading_placeholder)
                         }
                     ),
-                    contentDescription = "Item Image",
+                    contentDescription = store_text_item_image,
                     modifier = imageModifier
                 )
 
                 Column(modifier = Modifier
                     .padding(start = 8.dp)
                     .weight(1f)) {
-                    Text(text = "Nom: ${item.name}", color = textColor)
-                    Text(text = "Quantité: ${quantity}", color = textColor)
+                    Text(text = "$store_text_item_name: ${item.name}", color = textColor)
+                    Text(text = "$store_text_item_quantity: ${quantity}", color = textColor)
 
                 }
                 IconButton(onClick = { showDetailsDialog.value = true }) {
-                    Icon(Icons.Filled.Info, contentDescription = "Info", tint = textColor)
+                    Icon(Icons.Filled.Info, contentDescription = store_text_item_info, tint = textColor)
                 }
 
                 Button(
                     onClick = {
                         if (quantityToSellState.value.isEmpty() || priceState.value.isEmpty()) {
-                            Toast.makeText(context, "Veuillez remplir tous les champs", Toast.LENGTH_SHORT).show()
+                            Toast.makeText(context, sell_text_empty_fields, Toast.LENGTH_SHORT).show()
                         } else {
                             try {
                                 val quantityToSell = quantityToSellState.value.toInt()
                                 val price = priceState.value.toInt()
 
                                 if (quantityToSell > quantity!!) {
-                                    Toast.makeText(context, "Vous ne pouvez pas vendre plus que ce que vous avez", Toast.LENGTH_SHORT).show()
+                                    Toast.makeText(context, sell_text_sell_more_than_quantity, Toast.LENGTH_SHORT).show()
                                 } else if (quantityToSell <= 0) {
-                                    Toast.makeText(context, "Vous ne pouvez pas vendre moins d'un item", Toast.LENGTH_SHORT).show()
+                                    Toast.makeText(context, sell_text_sell_negative_quantity, Toast.LENGTH_SHORT).show()
                                 } else if (price <= 0) {
-                                    Toast.makeText(context, "Vous ne pouvez pas vendre à un prix négatif ou nulle", Toast.LENGTH_SHORT).show()
+                                    Toast.makeText(context, sell_text_sell_negative_price, Toast.LENGTH_SHORT).show()
                                 } else {
                                     storeViewModel.vendreItem(session, signature, item.itemId ?: "", quantityToSellState.value.toInt(), priceState.value.toInt()) { success ->
                                         if (success == "OK") {
-                                            Toast.makeText(context, "Vente réussie !", Toast.LENGTH_SHORT).show()
+                                            Toast.makeText(context, sell_text_sell_success, Toast.LENGTH_SHORT).show()
                                             storeViewModel.getStatutDuJoueur(session, signature)
                                             storeViewModel.recupererOffres(session, signature)
                                         }else if(success == "KO - NO ITEMS"){
-                                            Toast.makeText(context, "Vous n'avez rien à vendre !", Toast.LENGTH_SHORT).show()
+                                            Toast.makeText(context, sell_text_sell_no_items, Toast.LENGTH_SHORT).show()
                                         }else{
-                                            Toast.makeText(context, "Echec de la vente : $success", Toast.LENGTH_SHORT).show()
+                                            Toast.makeText(context, "$sell_text_sell_error : $success", Toast.LENGTH_SHORT).show()
                                         }
                                     }
                                 }
                             } catch (e: NumberFormatException) {
-                                Toast.makeText(context, "Veuillez entrer des nombres entiers valides", Toast.LENGTH_SHORT).show()
+                                Toast.makeText(context, sell_text_invalid_number, Toast.LENGTH_SHORT).show()
                             }
                         }
                     }) {
@@ -190,7 +205,7 @@ fun Item(item: Item, quantity : Int?, storeViewModel: StoreRepo) {
                 OutlinedTextField(
                     value = quantityToSellState.value,
                     onValueChange = { quantityToSellState.value = it },
-                    label = { Text("Quantité à vendre", color = textColor) },
+                    label = { Text(sell_text_quantity_sell, color = textColor) },
                     modifier = Modifier.weight(1f),
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
                     colors = TextFieldDefaults.outlinedTextFieldColors(
@@ -207,7 +222,7 @@ fun Item(item: Item, quantity : Int?, storeViewModel: StoreRepo) {
                 OutlinedTextField(
                     value = priceState.value,
                     onValueChange = { priceState.value = it },
-                    label = { Text("Prix", color = textColor) },
+                    label = { Text(store_text_item_price, color = textColor) },
                     modifier = Modifier.weight(1f),
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
                     colors = TextFieldDefaults.outlinedTextFieldColors(
@@ -225,17 +240,27 @@ fun Item(item: Item, quantity : Int?, storeViewModel: StoreRepo) {
 
 @Composable
 fun ItemDetailsDialog(item: Item, onDismiss: () -> Unit) {
+    val store_text_minerai = stringResource(id = R.string.store_text_minerai)
+    val store_text_artefact = stringResource(id = R.string.store_text_artefact)
+    val store_text_buy_unknown = stringResource(id = R.string.store_text_buy_unknown)
+    val store_text_item_details = stringResource(id = R.string.store_text_item_details)
+    val store_text_item_name = stringResource(id = R.string.store_text_item_name)
+    val store_text_item_type = stringResource(id = R.string.store_text_item_type)
+    val store_text_item_rarity = stringResource(id = R.string.store_text_item_rarity)
+    val store_text_item_description = stringResource(id = R.string.store_text_item_description)
+    val store_btn_close = stringResource(id = R.string.store_btn_close)
+
     val imageUrl = "https://test.vautard.fr/creuse_imgs/${item.imageUrl}"
     val isFrench = Locale.getDefault().language == Locale.FRENCH.language
     val description = if (isFrench) item?.descFr else item?.descEn
-    val type = if (item.type == "M") "Minerai" else if (item.type == "A") "Artefact" else "Inconnu"
+    val type = if (item.type == "M") store_text_minerai else if (item.type == "A") store_text_artefact else store_text_buy_unknown
 
     Dialog(onDismissRequest = onDismiss) {
         Card(modifier = Modifier
             .fillMaxWidth()
             .border(1.dp, Color.Black)) {
             Column(modifier = Modifier.padding(16.dp)) {
-                Text("Détails de l'item", style = MaterialTheme.typography.h6)
+                Text(store_text_item_details, style = MaterialTheme.typography.h6)
                 Spacer(Modifier.height(8.dp))
                 Image(
                     painter = rememberImagePainter(data = imageUrl),
@@ -245,12 +270,12 @@ fun ItemDetailsDialog(item: Item, onDismiss: () -> Unit) {
                         .align(Alignment.CenterHorizontally)
                 )
                 Spacer(Modifier.height(8.dp))
-                Text("Nom: ${item.name}")
-                Text("Type: $type")
-                Text("Rareté: ${item.rarity}")
-                Text("Description: $description")
+                Text("$store_text_item_name: ${item.name}")
+                Text("$store_text_item_type: $type")
+                Text("$store_text_item_rarity: ${item.rarity}")
+                Text("$store_text_item_description: $description")
                 Button(onClick = onDismiss, modifier = Modifier.align(Alignment.CenterHorizontally)) {
-                    Text("FERMER")
+                    Text(store_btn_close)
                 }
             }
         }
@@ -263,6 +288,10 @@ fun Sale(navController: NavController , storeRepo: StoreRepo) {
     val money = storeRepo.money.observeAsState(0)
     val context = LocalContext.current
     val scaffoldState = rememberScaffoldState()
+
+    val store_text_buy = stringResource(id = R.string.store_text_buy)
+    val store_text_sell = stringResource(id = R.string.store_text_sell)
+    val store_text_money = stringResource(id = R.string.store_text_money)
 
     Scaffold (
         topBar = {
@@ -298,7 +327,7 @@ fun Sale(navController: NavController , storeRepo: StoreRepo) {
                             contentColor = Color.White
                         )
                     ) {
-                        Text("Acheter")
+                        Text(store_text_buy)
                     }
 
                     Spacer(modifier= Modifier.width(1.dp)) // Espace optionnel entre les boutons
@@ -313,10 +342,10 @@ fun Sale(navController: NavController , storeRepo: StoreRepo) {
                         ),
                         border = BorderStroke(1.dp, Color.Black)
                     ) {
-                        Text("Vendre")
+                        Text(store_text_sell)
                     }
                 }
-                Text(text = "Mon solde: ${money.value} €")
+                Text(text = "$store_text_money: ${money.value} €")
                 Spacer(modifier = Modifier.height(8.dp))
                 SaleScreen(storeViewModel = storeRepo)
             }

@@ -54,6 +54,10 @@ fun ChangeName(navController: NavController) {
     val session = sharedPref.getString("session", "") ?: ""
     val signature = sharedPref.getString("signature", "") ?: ""
 
+    val changename_msg_success = stringResource(id = R.string.changename_msg_success)
+    val changename_msg_error = stringResource(id = R.string.changename_msg_error)
+    val changename_msg_name_empty = stringResource(id = R.string.changename_msg_name_empty)
+
     Scaffold(
         topBar = {
             TopAppBar(
@@ -106,7 +110,7 @@ fun ChangeName(navController: NavController) {
                           nameVal.value.isEmpty() -> {
                               Toast.makeText(
                                   context,
-                                  "Please enter the new name !",
+                                  changename_msg_name_empty,
                                   Toast.LENGTH_LONG
                               ).show()
                           }
@@ -120,13 +124,13 @@ fun ChangeName(navController: NavController) {
                                       navController.navigate("settings_page")
                                       Toast.makeText(
                                           context,
-                                          "Name changed !",
+                                          changename_msg_success,
                                           Toast.LENGTH_LONG
                                       ).show()
                                   } else {
                                       Toast.makeText(
                                           context,
-                                          "Error while changing name !",
+                                          changename_msg_error,
                                           Toast.LENGTH_LONG
                                       ).show()
                                   }

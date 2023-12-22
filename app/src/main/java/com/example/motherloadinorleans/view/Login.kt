@@ -44,6 +44,11 @@ fun LoginPage(navController: NavController) {
 
     val passwordVisiblity = remember { mutableStateOf(false) }
 
+    val login_msg_username_empty = stringResource(id = R.string.login_msg_username_empty)
+    val login_msg_password_empty = stringResource(id = R.string.login_msg_password_empty)
+    val login_msg_login_error = stringResource(id = R.string.login_msg_login_error)
+    val login_msg_login_success = stringResource(id = R.string.login_msg_login_success)
+
     BackHandler {
         /* rien car on ne veut pas que l'utilisateur puisse revenir en arrière */
     }
@@ -98,8 +103,8 @@ fun LoginPage(navController: NavController) {
                         OutlinedTextField(
                             value = emailVal.value,
                             onValueChange = { emailVal.value = it },
-                            label = { Text(text = stringResource(id = R.string.login_text_email), color = Black) },
-                            placeholder = { Text(text = stringResource(id = R.string.login_text_email), color = Black) },
+                            label = { Text(text = stringResource(id = R.string.login_text_id), color = Black) },
+                            placeholder = { Text(text = stringResource(id = R.string.login_text_id), color = Black) },
                             singleLine = true,
                             modifier = Modifier.fillMaxWidth(0.8f),
                             colors = TextFieldDefaults.outlinedTextFieldColors(
@@ -140,14 +145,14 @@ fun LoginPage(navController: NavController) {
                                     emailVal.value.isEmpty() -> {
                                         Toast.makeText(
                                             context,
-                                            "Please enter Username address!",
+                                            login_msg_username_empty,
                                             Toast.LENGTH_LONG
                                         ).show()
                                     }
                                     passwordVal.value.isEmpty() -> {
                                         Toast.makeText(
                                             context,
-                                            "Please enter the password!",
+                                            login_msg_password_empty,
                                             Toast.LENGTH_LONG
                                         ).show()
                                     }
@@ -157,13 +162,13 @@ fun LoginPage(navController: NavController) {
                                                 navController.navigate("menu_page")
                                                 Toast.makeText(
                                                     context,
-                                                    "Logged Successfully !",
+                                                    login_msg_login_success,
                                                     Toast.LENGTH_LONG
                                                 ).show()
                                             } else {
                                                 Toast.makeText(
                                                     context,
-                                                    "Logged error !",
+                                                    login_msg_login_error,
                                                     Toast.LENGTH_LONG
                                                 ).show()
                                             }

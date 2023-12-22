@@ -131,6 +131,23 @@ fun Game( navController: NavController, gameRepo: GameRepo) {
     val orientation = remember { FloatArray(3) }
     val azimuth = remember { mutableStateOf(0f) }
 
+    val game_text_level_pickaxe = stringResource(id = R.string.game_text_level_pickaxe)
+    val game_text_game = stringResource(id = R.string.game_text_game)
+    val game_text_depth = stringResource(id = R.string.game_text_depth)
+    val game_text_lat = stringResource(id = R.string.game_text_lat)
+    val game_text_lon = stringResource(id = R.string.game_text_lon)
+    val game_msg_dig_success = stringResource(id = R.string.game_msg_dig_success)
+    val game_msg_dig_wait = stringResource(id = R.string.game_msg_dig_wait)
+    val game_msg_pickaxe_bad = stringResource(id = R.string.game_msg_pickaxe_bad)
+    val game_msg_bad_locations = stringResource(id = R.string.game_msg_bad_locations)
+    val game_msg_error = stringResource(id = R.string.game_msg_error)
+    val game_msg_dig_stay = stringResource(id = R.string.game_msg_dig_stay)
+    val game_text_dig = stringResource(id = R.string.game_text_dig)
+    val game_text_neighbor = stringResource(id = R.string.game_text_neighbor)
+    val game_text_neighbor_name = stringResource(id = R.string.game_text_neighbor_name)
+    val game_text_neighbor_direction = stringResource(id = R.string.game_text_neighbor_direction)
+    val game_text_neighbor_distance = stringResource(id = R.string.game_text_neighbor_distance)
+
     DisposableEffect(Unit) {
         val sensorEventListener = object : SensorEventListener {
             override fun onSensorChanged(event: SensorEvent) {
@@ -205,7 +222,7 @@ fun Game( navController: NavController, gameRepo: GameRepo) {
                 },
                 actions = {
                     Text(
-                        text = "Niveau de la pioche : $niveauPioche",
+                        text = "$game_text_level_pickaxe : $niveauPioche",
                         fontSize = 20.sp,
                         fontWeight = FontWeight.Bold,
                         color = Color.White,
@@ -230,13 +247,13 @@ fun Game( navController: NavController, gameRepo: GameRepo) {
                 verticalArrangement = Arrangement.Center
             ) {
                 Text(
-                    text = "Jeu",
+                    text = game_text_game,
                     fontSize = 30.sp,
                     fontWeight = FontWeight.Bold,
                     color = Color.Red,
                 )
                 Text(
-                    text = "Profondeur du trou : $profondeur m",
+                    text = "$game_text_depth : $profondeur m",
                     fontSize = 27.sp,
                     fontWeight = FontWeight.Bold,
                     color = Color.Black,
@@ -244,13 +261,13 @@ fun Game( navController: NavController, gameRepo: GameRepo) {
                 Spacer(modifier = Modifier.padding(8.dp))
 
                 Text(
-                    text = "Lat: $latitude",
+                    text = "$game_text_lat: $latitude",
                     fontSize = 25.sp,
                     fontWeight = FontWeight.Bold,
                     color = Color.Black,
                 )
                 Text(
-                    text = "Lon: $longitude",
+                    text = "$game_text_lon: $longitude",
                     fontSize = 25.sp,
                     fontWeight = FontWeight.Bold,
                     color = Color.Black,
@@ -269,35 +286,35 @@ fun Game( navController: NavController, gameRepo: GameRepo) {
                                 if (success == "OK") {
                                     Toast.makeText(
                                         context,
-                                        "Creusement réussi !",
+                                        game_msg_dig_success,
                                         Toast.LENGTH_SHORT
                                     ).show()
                                 } else if (success == "KO - TOO FAST") {
                                     Toast.makeText(
                                         context,
-                                        "Attendez un peu pour creuser !",
+                                        game_msg_dig_wait,
                                         Toast.LENGTH_SHORT
                                     ).show()
                                 } else if (success == "KO  - BAD PICKAXE") {
                                     Toast.makeText(
                                         context,
-                                        "Votre pioche est trop faible !",
+                                        game_msg_pickaxe_bad,
                                         Toast.LENGTH_SHORT
                                     ).show()
                                 } else if (success == "KO - OUT OF BOUNDS") {
                                     Toast.makeText(
                                         context,
-                                        "Revenez sur le campus pour creuser !",
+                                        game_msg_bad_locations,
                                         Toast.LENGTH_SHORT
                                     ).show()
                                 } else {
-                                    Toast.makeText(context, "Erreur : $success", Toast.LENGTH_SHORT)
+                                    Toast.makeText(context, "$game_msg_error : $success", Toast.LENGTH_SHORT)
                                         .show()
                                 }
                             }
                         }
                         else {
-                            Toast.makeText(context, "Patientez un peu pour creuser !", Toast.LENGTH_SHORT).show()
+                            Toast.makeText(context, game_msg_dig_stay, Toast.LENGTH_SHORT).show()
                         }
                     },
                     enabled = isButtonEnabled.value,
@@ -306,7 +323,7 @@ fun Game( navController: NavController, gameRepo: GameRepo) {
                         .padding(horizontal = 50.dp, vertical = 16.dp)
                 ) {
                     Text(
-                        text = "Creuser",
+                        text = game_text_dig,
                         fontSize = 25.sp,
                         fontWeight = FontWeight.Bold,
                         color = Color.White,
@@ -324,7 +341,7 @@ fun Game( navController: NavController, gameRepo: GameRepo) {
                             .padding(16.dp)
                     ) {
                         Text(
-                            text = "Voisins les plus proches :",
+                            text = "$game_text_neighbor :",
                             fontSize = 25.sp,
                             fontWeight = FontWeight.Bold,
                             color = Color.Blue,
@@ -346,21 +363,21 @@ fun Game( navController: NavController, gameRepo: GameRepo) {
                                 Row {
                                     Column {
                                         Text(
-                                            text = "Nom : ${voisin.name} , Distance : $distance m",
+                                            text = "$game_text_neighbor_name : ${voisin.name} , $game_text_neighbor_distance : $distance m",
                                             fontSize = 18.sp,
                                             fontWeight = FontWeight.Bold,
                                             color = Color.Black,
                                         )
                                         Row {
                                             Text(
-                                                text = "Direction : $directionLabel",
+                                                text = "$game_text_neighbor_direction : $directionLabel",
                                                 fontSize = 18.sp,
                                                 fontWeight = FontWeight.Bold,
                                                 color = Color.Black,
                                             )
                                             Icon(
                                                 directionIcon,
-                                                contentDescription = "Direction",
+                                                contentDescription = game_text_neighbor_direction,
                                                 modifier = Modifier.size(24.dp),
                                                 tint = Color.Black
                                             )
