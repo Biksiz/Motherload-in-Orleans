@@ -48,6 +48,7 @@ import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.window.Dialog
 import coil.compose.rememberImagePainter
 import com.example.motherloadinorleans.model.Offer
@@ -181,6 +182,7 @@ fun ItemDetailsDialog(offer: Offer, onDismiss: () -> Unit) {
     val store_text_item_rarity = stringResource(id = R.string.store_text_item_rarity)
     val store_text_item_description = stringResource(id = R.string.store_text_item_description)
     val store_btn_close = stringResource(id = R.string.store_btn_close)
+    val store_text_item_image = stringResource(id = R.string.store_text_item_image)
 
     val imageUrl = "https://test.vautard.fr/creuse_imgs/${offer.item?.imageUrl}"
     val isFrench = Locale.getDefault().language == Locale.FRENCH.language
@@ -196,7 +198,7 @@ fun ItemDetailsDialog(offer: Offer, onDismiss: () -> Unit) {
                 Spacer(Modifier.height(8.dp))
                 Image(
                     painter = rememberImagePainter(data = imageUrl),
-                    contentDescription = "Item Image",
+                    contentDescription = store_text_item_image,
                     modifier = Modifier
                         .size(128.dp)
                         .align(Alignment.CenterHorizontally)
@@ -276,7 +278,7 @@ fun Store(navController: NavController, storeRepo: StoreRepo) {
                         Text(store_text_sell)
                     }
                 }
-                Text(text = "$store_text_money: ${money.value} €")
+                Text(text = "$store_text_money: ${money.value} €", fontWeight = FontWeight.Bold)
                 Spacer(modifier = Modifier.height(8.dp))
                 StoreScreen(storeViewModel = storeRepo)
             }

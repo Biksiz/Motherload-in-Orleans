@@ -47,6 +47,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -345,7 +346,7 @@ fun Sale(navController: NavController , storeRepo: StoreRepo) {
                         Text(store_text_sell)
                     }
                 }
-                Text(text = "$store_text_money: ${money.value} €")
+                Text(text = "$store_text_money: ${money.value} €", fontWeight = FontWeight.Bold)
                 Spacer(modifier = Modifier.height(8.dp))
                 SaleScreen(storeViewModel = storeRepo)
             }

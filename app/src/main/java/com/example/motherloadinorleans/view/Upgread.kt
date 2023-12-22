@@ -58,7 +58,7 @@ fun UpgreadScreen(workshopRepo: WorkshopRepo){
     val monNiveauPickaxe = workshopRepo.niveauPickaxe.observeAsState(0)
 
     if (upgrades.value.isEmpty()){
-        Text(text = "Aucune amélioration disponible")
+        Text(text = stringResource(id = R.string.upgrade_text_no_upgrade))
     }else{
         LazyColumn{
             items(upgrades.value){ upgrade ->
@@ -99,6 +99,12 @@ fun upgrade(upgrade: Pair<Int?,List<Pair<Item, Int?>>>, workshopRepo: WorkshopRe
         else -> Color.Black
     }
 
+    val upgrade_text_level_pickaxe = stringResource(id = R.string.upgrade_text_level_pickaxe)
+    val store_text_item_info = stringResource(id = R.string.store_text_item_info)
+    val upgrade_msg_success = stringResource(id = R.string.upgrade_msg_success)
+    val upgrade_msg_no_items = stringResource(id = R.string.upgrade_msg_no_items)
+    val upgrade_msg_unknown_id = stringResource(id = R.string.upgrade_msg_unknown_id)
+    val upgrade_msg_error = stringResource(id = R.string.upgrade_msg_error)
 
     Card(backgroundColor = backgroundColor,modifier = Modifier
         .fillMaxWidth()
@@ -110,26 +116,26 @@ fun upgrade(upgrade: Pair<Int?,List<Pair<Item, Int?>>>, workshopRepo: WorkshopRe
                         .padding(start = 8.dp)
                         .weight(1f)
                 ) {
-                    Text(text = "Amélioration pioche au niveau ${upgrade.first}", color = textColor)
+                    Text(text = "$upgrade_text_level_pickaxe ${upgrade.first}", color = textColor)
                     IconButton(onClick = { showDetailsDialog.value = true }) {
-                        Icon(Icons.Filled.Info, contentDescription = "Info")
+                        Icon(Icons.Filled.Info, contentDescription = store_text_item_info)
                     }
                 }
                 Button(onClick = {
                     workshopRepo.upgradPioche(session, signature, upgrade.first?: 0){ success ->
                         if (success == "OK") {
-                            Toast.makeText(context, "Upgrade réussi ", Toast.LENGTH_SHORT).show()
+                            Toast.makeText(context, upgrade_msg_success, Toast.LENGTH_SHORT).show()
                             workshopRepo.miseAJourUpgrad()
                         }else if(success == "KO - NO ITEMS"){
-                            Toast.makeText(context, "Pas assez d'items ", Toast.LENGTH_SHORT).show()
+                            Toast.makeText(context, upgrade_msg_no_items, Toast.LENGTH_SHORT).show()
                         }else if(success == "KO - UNKNOWN ID"){
-                            Toast.makeText(context, "KO - UNKNOWN ID", Toast.LENGTH_SHORT).show()
+                            Toast.makeText(context, upgrade_msg_unknown_id, Toast.LENGTH_SHORT).show()
                         }else{
-                            Toast.makeText(context, "Erreur lors de l'upgrade ", Toast.LENGTH_SHORT).show()
+                            Toast.makeText(context, "$upgrade_msg_error: $success", Toast.LENGTH_SHORT).show()
                         }
                     }
                 }) {
-                    Icon(Icons.Filled.Build, contentDescription = stringResource(id = R.string.menu_text_store))
+                    Icon(Icons.Filled.Build, contentDescription = stringResource(id = R.string.menu_text_workshop))
                 }
             }
         }
@@ -138,15 +144,21 @@ fun upgrade(upgrade: Pair<Int?,List<Pair<Item, Int?>>>, workshopRepo: WorkshopRe
 
 @Composable
 fun UpdateDetailsDialog(update : Pair<Int?,List<Pair<Item ,Int?>>>, onDismiss: () -> Unit){
+    val upgrade_text_level_pickaxe = stringResource(id = R.string.upgrade_text_level_pickaxe)
+    val upgrade_text_items_required = stringResource(id = R.string.upgrade_text_items_required)
+    val store_text_item_image = stringResource(id = R.string.store_text_item_image)
+    val store_text_item_name = stringResource(id = R.string.store_text_item_name)
+    val store_text_item_quantity = stringResource(id = R.string.store_text_item_quantity)
+    val store_btn_close = stringResource(id = R.string.store_btn_close)
 
     Dialog(onDismissRequest = onDismiss){
         Card(modifier = Modifier
             .fillMaxWidth()
             .border(1.dp, Color.Black)) {
             Column(modifier = Modifier.padding(16.dp)) {
-                Text(text = "Amélioration pioche au niveau ${update.first}")
+                Text(text = "$upgrade_text_level_pickaxe ${update.first}")
                 Spacer(modifier = Modifier.height(8.dp))
-                Text(text = "Items requis :")
+                Text(text = "$upgrade_text_items_required :")
                 val items = update.second
                 val itemsListe = remember { mutableStateOf(items) }
                 LazyColumn{
@@ -190,7 +202,7 @@ fun UpdateDetailsDialog(update : Pair<Int?,List<Pair<Item ,Int?>>>, onDismiss: (
                                                 placeholder(R.drawable.loading_placeholder)
                                             }
                                         ),
-                                        contentDescription = "Item Image",
+                                        contentDescription = store_text_item_image,
                                         modifier = imageModifier
                                     )
 
@@ -199,8 +211,8 @@ fun UpdateDetailsDialog(update : Pair<Int?,List<Pair<Item ,Int?>>>, onDismiss: (
                                             .padding(start = 8.dp)
                                             .weight(1f)
                                     ) {
-                                        Text(text = "Nom: ${item.name}")
-                                        Text(text = "Quantité: ${quantity}")
+                                        Text(text = "$store_text_item_name: ${item.name}")
+                                        Text(text = "$store_text_item_quantity: ${quantity}")
 
                                     }
                                 }
@@ -209,7 +221,7 @@ fun UpdateDetailsDialog(update : Pair<Int?,List<Pair<Item ,Int?>>>, onDismiss: (
                     }
                 }
                 Button(onClick = onDismiss, modifier = Modifier.align(Alignment.CenterHorizontally)) {
-                    Text("FERMER")
+                    Text(store_btn_close)
                 }
             }
         }
@@ -222,6 +234,9 @@ fun UpdateDetailsDialog(update : Pair<Int?,List<Pair<Item ,Int?>>>, onDismiss: (
 fun Upgreades(navController: NavController, workshopRepo: WorkshopRepo){
     val context = LocalContext.current
     val scaffoldState = rememberScaffoldState()
+
+    val upgrade_text_pickaxe = stringResource(id = R.string.upgrade_text_pickaxe)
+    val upgrade_text_artifacts = stringResource(id = R.string.upgrade_text_artifacts)
 
     Scaffold (
         topBar = {
@@ -258,7 +273,7 @@ fun Upgreades(navController: NavController, workshopRepo: WorkshopRepo){
                         ),
                         border = BorderStroke(1.dp, Color.Black)
                     ) {
-                        Text("Upgrade")
+                        Text(upgrade_text_pickaxe)
                     }
 
                     Spacer(modifier= Modifier.width(1.dp))
@@ -272,7 +287,7 @@ fun Upgreades(navController: NavController, workshopRepo: WorkshopRepo){
                             contentColor = Color.White
                         )
                     ) {
-                        Text("Album")
+                        Text(upgrade_text_artifacts)
                     }
                 }
                 UpgreadScreen(workshopRepo = workshopRepo)

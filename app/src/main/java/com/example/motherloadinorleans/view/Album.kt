@@ -8,8 +8,10 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -65,8 +67,10 @@ import java.util.Locale
 fun SaleScreenv(workshopRepo: WorkshopRepo){
     val artefacts = workshopRepo.artefacts.observeAsState(listOf())
 
+    val album_text_no_artefact = stringResource(id = R.string.album_text_no_artefact)
+
     if ( artefacts.value.isEmpty()){
-        Text(text ="Aucun artefact disponible")
+        Text(text = album_text_no_artefact)
     }else{
         LazyColumn{
             items(artefacts.value){ artefact ->
@@ -107,6 +111,11 @@ fun artefact(artefact: Item, workshopRepo: WorkshopRepo){
         5 -> Color.Black
         else -> Color.Black
     }
+
+    val store_text_item_info = stringResource(id = R.string.store_text_item_info)
+    val store_text_item_name = stringResource(id = R.string.store_text_item_name)
+    val store_text_item_image = stringResource(id = R.string.store_text_item_image)
+
     val imageUrl = "https://test.vautard.fr/creuse_imgs/${artefact.imageUrl}"
 
     val imageModifier = Modifier
@@ -126,19 +135,20 @@ fun artefact(artefact: Item, workshopRepo: WorkshopRepo){
                             placeholder(R.drawable.loading_placeholder)
                         }
                     ),
-                    contentDescription = "Item Image",
+                    contentDescription = store_text_item_image,
                     modifier = imageModifier
                 )
 
                 Column(
                     modifier = Modifier
                         .padding(start = 8.dp)
-                        .weight(1f)
+                        .weight(1f),
+                    verticalArrangement = Arrangement.Center
                 ) {
-                    Text(text = "Nom: ${artefact.name}", color = textColor)
+                    Text(text = "$store_text_item_name: ${artefact.name}", color = textColor)
                 }
                 IconButton(onClick = { showDetailsDialog.value = true }) {
-                    Icon(Icons.Filled.Info, contentDescription = "Info", tint = textColor)
+                    Icon(Icons.Filled.Info, contentDescription = store_text_item_info, tint = textColor)
                 }
             }
         }
@@ -147,32 +157,43 @@ fun artefact(artefact: Item, workshopRepo: WorkshopRepo){
 
 @Composable
 fun ArtefactDetailsDialog(item: Item, onDismiss: () -> Unit) {
+    val store_text_minerai = stringResource(id = R.string.store_text_minerai)
+    val store_text_artefact = stringResource(id = R.string.store_text_artefact)
+    val store_text_buy_unknown = stringResource(id = R.string.store_text_buy_unknown)
+    val store_text_item_details = stringResource(id = R.string.store_text_item_details)
+    val store_text_item_name = stringResource(id = R.string.store_text_item_name)
+    val store_text_item_type = stringResource(id = R.string.store_text_item_type)
+    val store_text_item_rarity = stringResource(id = R.string.store_text_item_rarity)
+    val store_text_item_description = stringResource(id = R.string.store_text_item_description)
+    val store_btn_close = stringResource(id = R.string.store_btn_close)
+    val store_text_item_image = stringResource(id = R.string.store_text_item_image)
+
     val imageUrl = "https://test.vautard.fr/creuse_imgs/${item.imageUrl}"
     val isFrench = Locale.getDefault().language == Locale.FRENCH.language
     val description = if (isFrench) item?.descFr else item?.descEn
-    val type = if (item.type == "M") "Minerai" else if (item.type == "A") "Artefact" else "Inconnu"
+    val type = if (item.type == "M") store_text_minerai else if (item.type == "A") store_text_artefact else store_text_buy_unknown
 
     Dialog(onDismissRequest = onDismiss) {
         Card(modifier = Modifier
             .fillMaxWidth()
             .border(1.dp, Color.Black)) {
             Column(modifier = Modifier.padding(16.dp)) {
-                Text("Détails de l'item", style = MaterialTheme.typography.h6)
+                Text(store_text_item_details, style = MaterialTheme.typography.h6)
                 Spacer(Modifier.height(8.dp))
                 Image(
                     painter = rememberImagePainter(data = imageUrl),
-                    contentDescription = "Item Image",
+                    contentDescription = store_text_item_image,
                     modifier = Modifier
                         .size(128.dp)
                         .align(Alignment.CenterHorizontally)
                 )
                 Spacer(Modifier.height(8.dp))
-                Text("Nom: ${item.name}")
-                Text("Type: $type")
-                Text("Rareté: ${item.rarity}")
-                Text("Description: $description")
+                Text("$store_text_item_name: ${item.name}")
+                Text("$store_text_item_type: $type")
+                Text("$store_text_item_rarity: ${item.rarity}")
+                Text("$store_text_item_description: $description")
                 Button(onClick = onDismiss, modifier = Modifier.align(Alignment.CenterHorizontally)) {
-                    Text("FERMER")
+                    Text(store_btn_close)
                 }
             }
         }
@@ -184,6 +205,9 @@ fun ArtefactDetailsDialog(item: Item, onDismiss: () -> Unit) {
 fun Album(navController: NavController, workshopRepo: WorkshopRepo){
     val context = LocalContext.current
     val scaffoldState = rememberScaffoldState()
+
+    val upgrade_text_pickaxe = stringResource(id = R.string.upgrade_text_pickaxe)
+    val upgrade_text_artifacts = stringResource(id = R.string.upgrade_text_artifacts)
 
     Scaffold(
         topBar = {
@@ -219,10 +243,10 @@ fun Album(navController: NavController, workshopRepo: WorkshopRepo){
                             contentColor = Color.White
                         )
                     ) {
-                        Text("Upgrade")
+                        Text(upgrade_text_pickaxe)
                     }
 
-                    Spacer(modifier= Modifier.width(1.dp)) // Espace optionnel entre les boutons
+                    Spacer(modifier= Modifier.width(1.dp))
 
                     Button(
                         onClick = {
@@ -234,7 +258,7 @@ fun Album(navController: NavController, workshopRepo: WorkshopRepo){
                         ),
                         border = BorderStroke(1.dp, Color.Black)
                     ) {
-                        Text("Album")
+                        Text(upgrade_text_artifacts)
                     }
                 }
                 SaleScreenv(workshopRepo = workshopRepo)

@@ -84,4 +84,14 @@
     <string name="store_text_item_image">Item Image</string>
     <string name="sell_text_quantity_sell">Quantité à vendre</string>
     <string name="game_text_no_neighbor">Aucun voisin trouvé</string>
+    <string name="upgrade_text_no_upgrade">Aucune amélioration est disponible</string>
+    <string name="upgrade_text_level_pickaxe">Amélioration de la pioche au niveau</string>
+    <string name="upgrade_msg_success">Amélioration réussi !</string>
+    <string name="upgrade_msg_no_items">Vous n\'avez pas assez de matériaux</string>
+    <string name="upgrade_msg_unknown_id">Impossible d\'améliorer cette pioche</string>
+    <string name="upgrade_msg_error">Erreur lors de l\'amélioration</string>
+    <string name="upgrade_text_items_required">Items requis</string>
+    <string name="upgrade_text_pickaxe">Pioches</string>
+    <string name="upgrade_text_artifacts">Artefacts</string>
+    <string name="album_text_no_artefact">Aucun artefact trouvé</string>
 </resources>

@@ -24,6 +24,9 @@ class WorkshopRepo private constructor() {
     val signature = sharedPref.getString("signature", "") ?: ""
 
     val storeRepo = StoreRepo.getInstance()
+    val userRepo = UserRepo.getInstance()
+
+    val _user = userRepo.get_user()
 
     private val _artefacts = MutableLiveData<List<Item>>()
     private val _upgrades = MutableLiveData<List<Pair<Int?,List<Pair<Item, Int?>>>>>()
@@ -83,7 +86,7 @@ class WorkshopRepo private constructor() {
                                     val itemId = elem.getElementsByTagName("ID").item(0).textContent.trim()
                                     storeRepo.getItem(session, signature , itemId){ item ->
                                         if (item == null){
-                                            Log.e(TAG, "Erreur lors de la récupération de l'item")
+                                            Log.e(TAG, "Erreur lors de la récupération de l'artefact")
                                         }else{
                                             val objet = Item(
                                                 itemId,
@@ -110,7 +113,10 @@ class WorkshopRepo private constructor() {
                                     e.printStackTrace()
                                 }
                             }.start()
-                        }else{
+                        } else if (status == "KO - SESSION INVALID" || status == "KO - SESSION EXPIRED") {
+                            Log.e(TAG, "Erreur artefacts session : $status")
+                            userRepo.reconnexion(_user.username, _user.password){ }
+                        } else{
                             Log.e(TAG, "Get artefacts error : $status")
                         }
                     }
@@ -140,63 +146,84 @@ class WorkshopRepo private constructor() {
                     val doc: Document = docBuilder.parse(response.byteInputStream())
 
                     val statusNode = doc.getElementsByTagName("STATUS").item(0)
-                    if(statusNode != null){
-                        val upgradesNode = doc.getElementsByTagName("UPGRADES").item(0)
-                        val listUpgrades = upgradesNode.childNodes
-                        val upgradesListeIterable = (0 until listUpgrades.length).map { listUpgrades.item(it) }
-                        val countDownLatch = CountDownLatch(upgradesListeIterable.size)
-                        if (upgradesListeIterable.isEmpty()){
-                            _upgrades.postValue(upgradesListe)
-                        }
+                    if(statusNode != null) {
+                        val status = statusNode.textContent.trim()
 
-                        if (upgradesNode != null && upgradesNode.nodeType == Node.ELEMENT_NODE){
-                            upgradesListeIterable.forEach{upgrade ->
-                                val elem = upgrade as Element
-                                val pickaxeId = elem.getElementsByTagName("PICKAXE_ID").item(0).textContent.toInt()
-                                val listItems = elem.getElementsByTagName("ITEMS").item(0).childNodes
-                                val itemsListeIterable = (0 until listItems.length).map { listItems.item(it) }
-                                val itemsListe = ArrayList<Pair<Item, Int?>>()
-                                if (listItems != null) {
-                                    itemsListeIterable.forEach { item ->
-                                        val elemItem = item as Element
-                                        val itemId = elemItem.getElementsByTagName("ITEM_ID").item(0).textContent.trim()
-                                        val quantity = elemItem.getElementsByTagName("QUANTITY").item(0).textContent.trim().toInt()
-                                        storeRepo.getItem(session, signature, itemId) { item ->
-                                            if (item == null) {
-                                                Log.e(TAG, "Erreur lors de la récupération de l'item")
-                                            } else {
-                                                val item = Item(
-                                                    itemId,
-                                                    item.name,
-                                                    item.type,
-                                                    item.rarity,
-                                                    item.imageUrl,
-                                                    item.descFr,
-                                                    item.descEn,
-                                                )
-                                                val pair = Pair(item, quantity)
-                                                itemsListe.add(pair)
+                        if (status == "OK"){
+                            val upgradesNode = doc.getElementsByTagName("UPGRADES").item(0)
+                            val listUpgrades = upgradesNode.childNodes
+                            val upgradesListeIterable =
+                                (0 until listUpgrades.length).map { listUpgrades.item(it) }
+                            val countDownLatch = CountDownLatch(upgradesListeIterable.size)
+                            if (upgradesListeIterable.isEmpty()) {
+                                _upgrades.postValue(upgradesListe)
+                            }
+
+                            if (upgradesNode != null && upgradesNode.nodeType == Node.ELEMENT_NODE) {
+                                upgradesListeIterable.forEach { upgrade ->
+                                    val elem = upgrade as Element
+                                    val pickaxeId = elem.getElementsByTagName("PICKAXE_ID")
+                                        .item(0).textContent.toInt()
+                                    val listItems =
+                                        elem.getElementsByTagName("ITEMS").item(0).childNodes
+                                    val itemsListeIterable =
+                                        (0 until listItems.length).map { listItems.item(it) }
+                                    val itemsListe = ArrayList<Pair<Item, Int?>>()
+                                    if (listItems != null) {
+                                        itemsListeIterable.forEach { item ->
+                                            val elemItem = item as Element
+                                            val itemId = elemItem.getElementsByTagName("ITEM_ID")
+                                                .item(0).textContent.trim()
+                                            val quantity = elemItem.getElementsByTagName("QUANTITY")
+                                                .item(0).textContent.trim().toInt()
+                                            storeRepo.getItem(session, signature, itemId) { item ->
+                                                if (item == null) {
+                                                    Log.e(
+                                                        TAG,
+                                                        "Erreur lors de la récupération de l'item"
+                                                    )
+                                                } else {
+                                                    val item = Item(
+                                                        itemId,
+                                                        item.name,
+                                                        item.type,
+                                                        item.rarity,
+                                                        item.imageUrl,
+                                                        item.descFr,
+                                                        item.descEn,
+                                                    )
+                                                    val pair = Pair(item, quantity)
+                                                    itemsListe.add(pair)
+                                                }
                                             }
                                         }
+                                    } else {
+                                        Log.e(TAG, "Node ITEMS not found")
                                     }
-                                }else{
-                                    Log.e(TAG, "Node ITEMS not found")
+                                    upgradesListe.add(Pair(pickaxeId, itemsListe))
+                                    countDownLatch.countDown()
                                 }
-                                upgradesListe.add(Pair(pickaxeId, itemsListe))
-                                countDownLatch.countDown()
+                            } else {
+                                Log.e(TAG, "Erreur lors de la lecture de la réponse XML")
                             }
-                        }else{
-                            Log.e(TAG, "Erreur lors de la lecture de la réponse XML")
+                            Thread {
+                                try {
+                                    countDownLatch.await()
+                                    _upgrades.postValue(upgradesListe)
+                                } catch (e: InterruptedException) {
+                                    e.printStackTrace()
+                                }
+                            }.start()
                         }
-                        Thread{
-                            try {
-                                countDownLatch.await()
-                                _upgrades.postValue(upgradesListe)
-                            }catch (e : InterruptedException){
-                                e.printStackTrace()
-                            }
-                        }.start()
-                    }else{
+                        else if (status == "KO - SESSION INVALID" || status == "KO - SESSION EXPIRED") {
+                            Log.e(TAG, "Erreur craft pioche session : $status")
+                            userRepo.reconnexion(_user.username, _user.password){ }
+                        }
+                        else{
+                            Log.e(TAG, "Get upgrades error : $status")
+                        }
+                    }
+                    else{
                         Log.e(TAG, "Get upgrades error : $statusNode")
                     }
                 }catch (e: Exception){
@@ -233,10 +260,12 @@ class WorkshopRepo private constructor() {
 
                             if (niveauPickaxeNode != null && niveauPickaxeNode.nodeType == Node.ELEMENT_NODE){
                                 _niveauPickaxe.postValue(niveauPickaxeNode.textContent.trim().toInt())
-
                             }
+                        } else if (status == "KO - SESSION INVALID" || status == "KO - SESSION EXPIRED") {
+                            userRepo.reconnexion(_user.username, _user.password){ }
+                            Log.d(TAG, "Erreur Status session - $status")
                         } else {
-                            Log.e(TAG, "Get Offers : Erreur - $status")
+                            Log.e(TAG, "Get Status : Erreur - $status")
                         }
                     }
                 } catch (e: Exception) {
@@ -244,7 +273,7 @@ class WorkshopRepo private constructor() {
                 }
             },
             { error ->
-                Log.d(TAG,"Get offers error")
+                Log.d(TAG,"Get status error")
                 error.printStackTrace()
             })
 
@@ -270,7 +299,7 @@ class WorkshopRepo private constructor() {
                     if(statusNode != null){
                         val status = statusNode.textContent.trim()
                         if(status == "OK"){
-                            Log.d(TAG, "Upgreade pioche réussi!!")
+                            Log.d(TAG, "Upgrade pioche réussi!!")
                             callback("OK")
                         }else if( status == "KO - NO ITEMS"){
                             Log.e(TAG, "KO - NO ITEMS")
@@ -278,8 +307,12 @@ class WorkshopRepo private constructor() {
                         }else if( status == "KO - UNKNOWN ID") {
                             Log.e(TAG, "KO - UNKNOWN ID")
                             callback(status)
+                        }else if (status == "KO - SESSION INVALID" || status == "KO - SESSION EXPIRED") {
+                            userRepo.reconnexion(_user.username, _user.password){ }
+                            Log.d(TAG, "Erreur Upgrade session : - $status")
+                            callback(status)
                         }else{
-                            Log.e(TAG, "Upgreade pioche : Erreur")
+                            Log.e(TAG, "Upgrade pioche : Erreur")
                             callback(status)
                         }
                     }
@@ -288,7 +321,7 @@ class WorkshopRepo private constructor() {
                 }
             },
             { error ->
-                Log.e(TAG, "Upgreade pioche : Erreur")
+                Log.e(TAG, "Upgrade pioche : Erreur")
                 error.printStackTrace()
                 callback("ERREUR")
             })

@@ -93,7 +93,7 @@ fun Menu(navController: NavController) {
 
                         Button(
                             onClick = {
-                                navController.navigate("album_page")
+                                navController.navigate("upgread_page")
                             },
                             modifier = Modifier.weight(1f)) {
                             Column(horizontalAlignment = Alignment.CenterHorizontally) {

@@ -83,4 +83,14 @@
     <string name="store_text_item_image">Item Image</string>
     <string name="sell_text_quantity_sell">Quantity to sell</string>
     <string name="game_text_no_neighbor">No neighbor found</string>
+    <string name="upgrade_text_no_upgrade">No improvement is available</string>
+    <string name="upgrade_text_level_pickaxe">Level pickaxe improvement</string>
+    <string name="upgrade_msg_success">Improvement successful !</string>
+    <string name="upgrade_msg_no_items">You don\'t have enough materials</string>
+    <string name="upgrade_msg_unknown_id">Unable to improve this pickaxe</string>
+    <string name="upgrade_msg_error">Error while improving</string>
+    <string name="upgrade_text_items_required">Required items</string>
+    <string name="upgrade_text_pickaxe">Pickaxe</string>
+    <string name="upgrade_text_artifacts">Artifacts</string>
+    <string name="album_text_no_artefact">No artifacts found</string>
 </resources>

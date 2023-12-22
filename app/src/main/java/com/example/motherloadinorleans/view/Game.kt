@@ -348,7 +348,7 @@ fun Game( navController: NavController, gameRepo: GameRepo) {
                             color = Color.Blue,
                         )
 
-                        if( voisins.isEmpty() || voisins == null ) {
+                        if( voisins.isEmpty() || voisins == null || voisins.size == 0) {
                             Row {
                                 Text(text = game_text_no_neighbor)
                             }
