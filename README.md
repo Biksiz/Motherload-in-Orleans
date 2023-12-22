@@ -24,4 +24,18 @@ cd motherload-in-orleans
 - Redwan OMARI
 
 ## Statut du projet
-Nous avons ajoutés une grande partie des fonctionnalités demandées. Voici les fonctionnalités qui n'ont pas pû être implementées:
+Nous avons pu implementés toutes les fonctionnalités suivantes:
+
+- Connexion
+- Gestion du compte
+- Jeu
+- Marché
+- Atelier
+
+Nous avons également respectés les criteres suivants:
+- Multilingue (en français et anglais)
+- Adaptation à tous les formats d'écrans
+- Tolérance aux connexions réseau aléatoires
+- Utilisation sobre du serveur au possible
+- Utilisation réelle de la localisation du joueur
+- Design confortable à l'utilisation
