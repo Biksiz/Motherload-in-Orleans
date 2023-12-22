@@ -147,6 +147,7 @@ fun Game( navController: NavController, gameRepo: GameRepo) {
     val game_text_neighbor_name = stringResource(id = R.string.game_text_neighbor_name)
     val game_text_neighbor_direction = stringResource(id = R.string.game_text_neighbor_direction)
     val game_text_neighbor_distance = stringResource(id = R.string.game_text_neighbor_distance)
+    val game_text_no_neighbor = stringResource(id = R.string.game_text_no_neighbor)
 
     DisposableEffect(Unit) {
         val sensorEventListener = object : SensorEventListener {
@@ -347,50 +348,55 @@ fun Game( navController: NavController, gameRepo: GameRepo) {
                             color = Color.Blue,
                         )
 
-                        LazyColumn{
-                            val cinqPremiersVoisins = voisins
-                                .filter { voisin -> voisin.name != name }
-                                .sortedBy { voisin ->
-                                    calculateDistance(longitude!!.toDouble(), latitude!!.toDouble(), voisin.position.first!!.toDouble(), voisin.position.second!!.toDouble())
-                                }
-                            .take(5)
+                        if( voisins.isEmpty() || voisins == null ) {
+                            Row {
+                                Text(text = game_text_no_neighbor)
+                            }
+                        }else{
+                            LazyColumn{
+                                val cinqPremiersVoisins = voisins
+                                    .filter { voisin -> voisin.name != name }
+                                    .sortedBy { voisin ->
+                                        calculateDistance(longitude!!.toDouble(), latitude!!.toDouble(), voisin.position.first!!.toDouble(), voisin.position.second!!.toDouble())
+                                    }
+                                    .take(5)
 
-                            items( cinqPremiersVoisins.size ){ index  ->
-                                val voisin = cinqPremiersVoisins[index]
-                                val distance = calculateDistance(longitude!!.toDouble(), latitude!!.toDouble(), voisin.position.first!!.toDouble(), voisin.position.second!!.toDouble())
-                                val (directionIcon, directionLabel) = determinerDirection(latitude!!.toDouble(), longitude!!.toDouble(), voisin.position.first!!.toDouble(), voisin.position.second!!.toDouble(), azimuth.value)
+                                items( cinqPremiersVoisins.size ){ index  ->
+                                    val voisin = cinqPremiersVoisins[index]
+                                    val distance = calculateDistance(longitude!!.toDouble(), latitude!!.toDouble(), voisin.position.first!!.toDouble(), voisin.position.second!!.toDouble())
+                                    val (directionIcon, directionLabel) = determinerDirection(latitude!!.toDouble(), longitude!!.toDouble(), voisin.position.first!!.toDouble(), voisin.position.second!!.toDouble(), azimuth.value)
 
-                                Row {
-                                    Column {
-                                        Text(
-                                            text = "$game_text_neighbor_name : ${voisin.name} , $game_text_neighbor_distance : $distance m",
-                                            fontSize = 18.sp,
-                                            fontWeight = FontWeight.Bold,
-                                            color = Color.Black,
-                                        )
-                                        Row {
+                                    Row {
+                                        Column {
                                             Text(
-                                                text = "$game_text_neighbor_direction : $directionLabel",
+                                                text = "$game_text_neighbor_name : ${voisin.name} , $game_text_neighbor_distance : $distance m",
                                                 fontSize = 18.sp,
                                                 fontWeight = FontWeight.Bold,
                                                 color = Color.Black,
                                             )
-                                            Icon(
-                                                directionIcon,
-                                                contentDescription = game_text_neighbor_direction,
-                                                modifier = Modifier.size(24.dp),
-                                                tint = Color.Black
-                                            )
-                                        }
-                                        if (index != cinqPremiersVoisins.size - 1)
-                                        {
-                                            Divider(color = Color.Gray, thickness = 1.dp)
+                                            Row {
+                                                Text(
+                                                    text = "$game_text_neighbor_direction : $directionLabel",
+                                                    fontSize = 18.sp,
+                                                    fontWeight = FontWeight.Bold,
+                                                    color = Color.Black,
+                                                )
+                                                Icon(
+                                                    directionIcon,
+                                                    contentDescription = game_text_neighbor_direction,
+                                                    modifier = Modifier.size(24.dp),
+                                                    tint = Color.Black
+                                                )
+                                            }
+                                            if (index != cinqPremiersVoisins.size - 1)
+                                            {
+                                                Divider(color = Color.Gray, thickness = 1.dp)
+                                            }
                                         }
                                     }
                                 }
                             }
                         }
-
                     }
                 }
             }

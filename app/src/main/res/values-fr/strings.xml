@@ -83,4 +83,5 @@
     <string name="sell_text_invalid_number">Veuillez entrer des nombres entiers valides</string>
     <string name="store_text_item_image">Item Image</string>
     <string name="sell_text_quantity_sell">Quantité à vendre</string>
+    <string name="game_text_no_neighbor">Aucun voisin trouvé</string>
 </resources>

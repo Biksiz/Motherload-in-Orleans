@@ -82,4 +82,5 @@
     <string name="sell_text_invalid_number">Please enter valid integers</string>
     <string name="store_text_item_image">Item Image</string>
     <string name="sell_text_quantity_sell">Quantity to sell</string>
+    <string name="game_text_no_neighbor">No neighbor found</string>
 </resources>

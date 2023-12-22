@@ -32,6 +32,7 @@ import com.example.motherloadinorleans.view.Settings
 import com.example.motherloadinorleans.view.Store
 import com.example.motherloadinorleans.view.Sale
 import com.example.motherloadinorleans.view.Game
+import com.example.motherloadinorleans.view.Upgreades
 import kotlinx.coroutines.*
 
 class MainActivity : ComponentActivity(), CoroutineScope by MainScope() {
@@ -101,6 +102,7 @@ fun navigatePage() {
             composable("login_page", content = { LoginPage(navController = navController) })
             composable("game_page", content = { Game(navController = navController, gameRepo = GameRepo.instance) })
             composable("album_page", content = { Album(navController = navController, workshopRepo = WorkshopRepo.instance) })
+            composable("upgread_page", content = { Upgreades(navController = navController, workshopRepo = WorkshopRepo.instance) })
         }
     )
 }
