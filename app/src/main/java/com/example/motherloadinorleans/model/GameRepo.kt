@@ -46,8 +46,6 @@ class GameRepo private constructor(){
     }
 
 
-
-
     companion object {
         @Volatile
         private var INSTANCE: GameRepo? = null
@@ -266,7 +264,7 @@ class GameRepo private constructor(){
                             if (niveauPickaxeNode != null && niveauPickaxeNode.nodeType == Node.ELEMENT_NODE && positionNode != null && positionNode.nodeType == Node.ELEMENT_NODE){
                                 _position.postValue(Pair(lon, lat))
                                 _niveauPickaxe.postValue(niveauPickaxeNode.textContent.trim().toInt())
-                                deplacement(session, signature, lon, lat, callback = { status ->
+                                deplacement(session, signature, lat, lon, callback = { status ->
                                     if (status == "OK"){
                                         Log.d(TAG, "Déplacement réussi !")
                                     }else if (status == "KO - BAD LOCATION FORMAT"){

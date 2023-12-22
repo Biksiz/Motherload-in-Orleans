@@ -110,9 +110,9 @@ fun Game( navController: NavController, gameRepo: GameRepo) {
     val scaffoldState = rememberScaffoldState()
     val profondeur = gameRepo.profondeur.observeAsState().value
     val position = gameRepo.position.observeAsState().value
-    val latitude = position?.first
-    val longitude = position?.second
-    val niveauPioche = gameRepo.niveauPickaxe.observeAsState().value
+    val latitude = position?.first ?: 0.0f
+    val longitude = position?.second ?: 0.0f
+    val niveauPioche = gameRepo.niveauPickaxe.observeAsState().value ?: 0
 
     var voisins = gameRepo.voisin.observeAsState().value ?: listOf()
 
@@ -188,7 +188,9 @@ fun Game( navController: NavController, gameRepo: GameRepo) {
             val handler = Handler(Looper.getMainLooper())
             val runnable = object : Runnable {
                 override fun run() {
-                    gameRepo.deplacement(session, signature, currentPosition.value.second, currentPosition.value.first) { }
+                    gameRepo.deplacement(session, signature, currentPosition.value.second, currentPosition.value.first) {
+                        gameRepo.getStatutDuJoueur(session, signature)
+                    }
                     handler.postDelayed(this, 10000)
                 }
             }
