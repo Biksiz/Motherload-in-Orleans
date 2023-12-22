@@ -150,20 +150,31 @@ fun Item(item: Item, quantity : Int?, storeViewModel: StoreRepo) {
                         if (quantityToSellState.value.isEmpty() || priceState.value.isEmpty()) {
                             Toast.makeText(context, "Veuillez remplir tous les champs", Toast.LENGTH_SHORT).show()
                         } else {
-                            if (quantityToSellState.value.toInt() > quantity!!) {
-                                Toast.makeText(context, "Vous ne pouvez pas vendre plus que ce que vous avez", Toast.LENGTH_SHORT).show()
-                            } else {
-                                storeViewModel.vendreItem(session, signature, item.itemId ?: "", quantityToSellState.value.toInt(), priceState.value.toInt()) { success ->
-                                    if (success == "OK") {
-                                        Toast.makeText(context, "Vente réussie !", Toast.LENGTH_SHORT).show()
-                                        storeViewModel.getStatutDuJoueur(session, signature)
-                                        storeViewModel.recupererOffres(session, signature)
-                                    }else if(success == "KO - NO ITEMS"){
-                                        Toast.makeText(context, "Vous n'avez rien à vendre !", Toast.LENGTH_SHORT).show()
-                                    }else{
-                                        Toast.makeText(context, "Echec de la vente : $success", Toast.LENGTH_SHORT).show()
+                            try {
+                                val quantityToSell = quantityToSellState.value.toInt()
+                                val price = priceState.value.toInt()
+
+                                if (quantityToSell > quantity!!) {
+                                    Toast.makeText(context, "Vous ne pouvez pas vendre plus que ce que vous avez", Toast.LENGTH_SHORT).show()
+                                } else if (quantityToSell <= 0) {
+                                    Toast.makeText(context, "Vous ne pouvez pas vendre moins d'un item", Toast.LENGTH_SHORT).show()
+                                } else if (price <= 0) {
+                                    Toast.makeText(context, "Vous ne pouvez pas vendre à un prix négatif ou nulle", Toast.LENGTH_SHORT).show()
+                                } else {
+                                    storeViewModel.vendreItem(session, signature, item.itemId ?: "", quantityToSellState.value.toInt(), priceState.value.toInt()) { success ->
+                                        if (success == "OK") {
+                                            Toast.makeText(context, "Vente réussie !", Toast.LENGTH_SHORT).show()
+                                            storeViewModel.getStatutDuJoueur(session, signature)
+                                            storeViewModel.recupererOffres(session, signature)
+                                        }else if(success == "KO - NO ITEMS"){
+                                            Toast.makeText(context, "Vous n'avez rien à vendre !", Toast.LENGTH_SHORT).show()
+                                        }else{
+                                            Toast.makeText(context, "Echec de la vente : $success", Toast.LENGTH_SHORT).show()
+                                        }
                                     }
                                 }
+                            } catch (e: NumberFormatException) {
+                                Toast.makeText(context, "Veuillez entrer des nombres entiers valides", Toast.LENGTH_SHORT).show()
                             }
                         }
                     }) {

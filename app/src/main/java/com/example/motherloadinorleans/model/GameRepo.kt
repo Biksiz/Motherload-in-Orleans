@@ -19,6 +19,7 @@ import org.xml.sax.InputSource
 class GameRepo private constructor(){
     private val TAG = "GameRepo"
     private val BASE_URL = "https://test.vautard.fr/creuse_srv/"
+    private val userRepo = UserRepo.getInstance()
 
     private val _voisin = MutableLiveData<List<Voisin>>()
     private val _profondeur = MutableLiveData<String>()
@@ -35,6 +36,8 @@ class GameRepo private constructor(){
     val sharedPref = MotherlandApplication.instance.getSharedPreferences("MyPrefs", Context.MODE_PRIVATE)
     val session = sharedPref.getString("session", "") ?: ""
     val signature = sharedPref.getString("signature", "") ?: ""
+
+    val _user = userRepo.get_user()
 
     init {
         setProfondeur("0")
@@ -120,11 +123,15 @@ class GameRepo private constructor(){
                                     e.printStackTrace()
                                 }
                             }.start()
-                        }else if (status == "KO - BAD LOCATION FORMAT"){
+                        } else if (status == "KO - BAD LOCATION FORMAT"){
                             Log.e(TAG, "Déplacement : Erreur - $status")
                             callback("KO - BAD LOCATION FORMAT")
-                        }else {
-                            Log.e(TAG, "Vente : Erreur - $status")
+                        } else if (status == "KO - SESSION INVALID" || status == "KO - SESSION EXPIRED") {
+                            userRepo.reconnexion(_user.username, _user.password){ }
+                            Log.d(TAG, "Deplacement : Erreur - $status")
+                        }
+                        else {
+                            Log.e(TAG, "Deplacement : Erreur - $status")
                             callback(status)
                         }
                     }
@@ -206,13 +213,16 @@ class GameRepo private constructor(){
                                     e.printStackTrace()
                                 }
                             }.start()
-                        }else if (status == "KO - TOO FAST"){
+                        } else if (status == "KO - TOO FAST"){
                             Log.e(TAG, "Creuser : Erreur - $status")
                             callback("KO - TOO FAST")
-                        }else if (status == "KO  - BAD PICKAXE"){
+                        } else if (status == "KO  - BAD PICKAXE"){
                             Log.e(TAG, "Creuser : Erreur - $status")
                             callback("KO  - BAD PICKAXE")
-                        }else {
+                        } else if (status == "KO - SESSION INVALID" || status == "KO - SESSION EXPIRED") {
+                            userRepo.reconnexion(_user.username, _user.password){ }
+                            Log.d(TAG, "Creuser : Erreur - $status")
+                        } else {
                             Log.e(TAG, "Creuser : Erreur - $status")
                             callback(status)
                         }
@@ -267,6 +277,9 @@ class GameRepo private constructor(){
                                     }
                                 })
                             }
+                        } else if (status == "KO - SESSION INVALID" || status == "KO - SESSION EXPIRED") {
+                            userRepo.reconnexion(_user.username, _user.password){ }
+                            Log.d(TAG, "Get Status : Erreur - $status")
                         } else {
                             Log.e(TAG, "Get Status : Erreur - $status")
                         }

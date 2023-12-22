@@ -38,6 +38,7 @@ class StoreRepo private constructor() {
     val sharedPref = MotherlandApplication.instance.getSharedPreferences("MyPrefs", Context.MODE_PRIVATE)
     val session = sharedPref.getString("session", "") ?: ""
     val signature = sharedPref.getString("signature", "") ?: ""
+    val _user = userRepo.get_user()
 
     init {
         recupererOffres(session, signature)
@@ -97,11 +98,16 @@ class StoreRepo private constructor() {
                                 elem.getElementsByTagName("DESC_FR").item(0)?.textContent,
                                 elem.getElementsByTagName("DESC_EN").item(0)?.textContent
                             )
-                            callback(item)  // Utilisation du callback pour retourner l'item
+                            callback(item)
                         } else {
                             Log.e(TAG, "Noeud 'ITEM' introuvable dans la réponse XML")
                             callback(null)
                         }
+                    } else if (statusNode?.textContent?.trim() == "KO - SESSION INVALID" || statusNode?.textContent?.trim() == "KO - SESSION EXPIRED") {
+                        val status = statusNode?.textContent?.trim()
+                        userRepo.reconnexion(_user.username, _user.password){ }
+                        Log.d(TAG, "Get Item : Erreur - $status")
+                        callback(null)
                     } else {
                         val status = statusNode?.textContent?.trim()
                         Log.e(TAG, "Get Item : Erreur - $status")
@@ -192,6 +198,9 @@ class StoreRepo private constructor() {
                             }.start()
                             Log.e(TAG, "offres 2: $offersList")
 
+                        } else if (status == "KO - SESSION INVALID" || status == "KO - SESSION EXPIRED") {
+                            userRepo.reconnexion(_user.username, _user.password){ }
+                            Log.d(TAG, "Get Offers : Erreur - $status")
                         } else {
                             Log.e(TAG, "Get Offers : Erreur - $status")
                         }
@@ -229,6 +238,10 @@ class StoreRepo private constructor() {
                         if (status == "OK") {
                             Log.d(TAG, "Achat réussi !")
                             callback("OK")
+                        } else if (status == "KO - SESSION INVALID" || status == "KO - SESSION EXPIRED") {
+                            userRepo.reconnexion(_user.username, _user.password){ }
+                            Log.d(TAG, "Achat : Erreur - $status")
+                            callback(status)
                         } else {
                             Log.e(TAG, "Achat : Erreur - $status")
                             callback(status)
@@ -273,7 +286,11 @@ class StoreRepo private constructor() {
                         }else if (status == "KO - NO ITEMS"){
                             Log.e(TAG, "Vente : Erreur - $status")
                             callback("KO - NO ITEMS")
-                        }else {
+                        } else if (status == "KO - SESSION INVALID" || status == "KO - SESSION EXPIRED") {
+                            userRepo.reconnexion(_user.username, _user.password){ }
+                            Log.d(TAG, "Vente : Erreur - $status")
+                            callback(status)
+                        } else {
                             Log.e(TAG, "Vente : Erreur - $status")
                             callback(status)
                         }
@@ -368,6 +385,9 @@ class StoreRepo private constructor() {
                             }.start()
                             Log.e(TAG, "ITEMS 2: $itemsListe")
 
+                        } else if (status == "KO - SESSION INVALID" || status == "KO - SESSION EXPIRED") {
+                            userRepo.reconnexion(_user.username, _user.password){ }
+                            Log.d(TAG, "Get Offers : Erreur - $status")
                         } else {
                             Log.e(TAG, "Get Offers : Erreur - $status")
                         }

@@ -154,7 +154,11 @@ class UserRepo  private constructor() {
                         if (status == "OK") {
                             Log.d(TAG, "Réinitialisation réussie !")
                             callback(true)
-                        } else {
+                        } else if (status == "KO - SESSION INVALID" || status == "KO - SESSION EXPIRED") {
+                            reconnexion(_user.username, _user.password, callback)
+                            Log.d(TAG, "Réinitialisation : Erreur - $status")
+                            callback(false)
+                        }  else {
                             Log.e(TAG, "Réinitialisation : Erreur - $status")
                             callback(false)
                         }
@@ -194,6 +198,10 @@ class UserRepo  private constructor() {
                         if (status == "OK") {
                             Log.d(TAG, "Changement de nom réussi !")
                             callback(true)
+                        } else if (status == "KO - SESSION INVALID" || status == "KO - SESSION EXPIRED") {
+                            reconnexion(_user.username, _user.password, callback)
+                            Log.d(TAG, "Changement : Erreur - $status")
+                            callback(false)
                         } else {
                             Log.e(TAG, "changement de nom : Erreur - $status")
                             callback(false)
